@@ -1,0 +1,1 @@
+Future<dynamic> getLocation() async {}
