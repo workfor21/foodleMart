@@ -19,8 +19,14 @@ class Category extends StatelessWidget {
       appBar: AppBar(
           elevation: 0,
           flexibleSpace: Container(
-              decoration:
-                  BoxDecoration(color: Color.fromRGBO(246, 219, 59, 1))),
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: <Color>[
+                Color.fromRGBO(246, 219, 59, 1),
+                Color.fromARGB(255, 246, 227, 59)
+              ]))),
           automaticallyImplyLeading: false,
           title: Image.asset("assets/images/foodle_logo.png", width: 90),
           actions: [
@@ -46,7 +52,7 @@ class Category extends StatelessWidget {
                       padding:
                           const EdgeInsets.only(left: 40, top: 5, bottom: 5),
                       width: double.infinity,
-                      color: Color.fromARGB(255, 246, 227, 59),
+                      color: Color.fromARGB(255, 252, 235, 82),
                       child: Text("all category"))
                 ],
               ),
@@ -82,7 +88,6 @@ class Category extends StatelessWidget {
   }
 }
 
-//
 class Circlewidget extends StatelessWidget {
   String? id;
   String image;

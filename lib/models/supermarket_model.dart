@@ -1,13 +1,13 @@
 // To parse this JSON data, do
 //
-//     final superMarketModel = superMarketModelFromJson(jsonString);
+//     final superMarketModel = superMarketModelFromJson(jsonString?);
 
 import 'dart:convert';
 
-SuperMarketModel superMarketModelFromJson(String str) =>
-    SuperMarketModel.fromJson(json.decode(str));
+SuperMarketModel superMarketModelFromJson(String? str) =>
+    SuperMarketModel.fromJson(json.decode(str!));
 
-String superMarketModelToJson(SuperMarketModel data) =>
+String? superMarketModelToJson(SuperMarketModel data) =>
     json.encode(data.toJson());
 
 class SuperMarketModel {
@@ -20,7 +20,7 @@ class SuperMarketModel {
     this.brands,
     this.products,
   });
-//
+
   String? sts;
   String? msg;
   int? cartcount;
@@ -29,7 +29,7 @@ class SuperMarketModel {
   List<dynamic>? brands;
   List<Product>? products;
 
-  factory SuperMarketModel.fromJson(Map<String, dynamic> json) =>
+  factory SuperMarketModel.fromJson(Map<String?, dynamic> json) =>
       SuperMarketModel(
         sts: json["sts"],
         msg: json["msg"],
@@ -42,7 +42,7 @@ class SuperMarketModel {
             json["products"].map((x) => Product.fromJson(x))),
       );
 
-  Map<String, dynamic> toJson() => {
+  Map<String?, dynamic> toJson() => {
         "sts": sts,
         "msg": msg,
         "cartcount": cartcount,
@@ -54,36 +54,60 @@ class SuperMarketModel {
       };
 }
 
-class Product {
-  Product({
-    required this.id,
-    required this.catId,
-    required this.shopType,
-    required this.shopId,
-    required this.type,
-    required this.name,
-    required this.price,
-    required this.offerprice,
-    required this.status,
-    required this.image,
-    required this.hasUnits,
+class Category {
+  Category({
+    this.the15,
   });
 
-  int id;
-  int catId;
-  String shopType;
-  int shopId;
-  String type;
-  String name;
-  int price;
-  int offerprice;
-  String status;
-  String image;
-  String hasUnits;
+  String? the15;
 
-  factory Product.fromJson(Map<String, dynamic> json) => Product(
+  factory Category.fromJson(Map<String?, dynamic> json) => Category(
+        the15: json["15"],
+      );
+
+  Map<String?, dynamic> toJson() => {
+        "15": the15,
+      };
+}
+
+class Product {
+  Product({
+    this.id,
+    this.catId,
+    this.subcatId,
+    this.brandId,
+    this.shopType,
+    this.shopId,
+    this.type,
+    this.name,
+    this.price,
+    this.offerprice,
+    this.status,
+    this.image,
+    this.hasUnits,
+    this.units,
+  });
+
+  int? id;
+  int? catId;
+  int? subcatId;
+  int? brandId;
+  String? shopType;
+  int? shopId;
+  String? type;
+  String? name;
+  int? price;
+  int? offerprice;
+  String? status;
+  String? image;
+  String? hasUnits;
+  List<SuperMarketUnitModel>? units;
+
+  factory Product.fromJson(Map<String?, dynamic> json) => Product(
         id: json["id"],
         catId: json["cat_id"],
+        subcatId: json["subcat_id"],
+        brandId: json["brand_id"],
         shopType: json["shop_type"],
         shopId: json["shop_id"],
         type: json["type"],
@@ -93,11 +117,15 @@ class Product {
         status: json["status"],
         image: json["image"],
         hasUnits: json["has_units"],
+        units: List<SuperMarketUnitModel>.from(
+            json["units"].map((x) => SuperMarketUnitModel.fromJson(x))),
       );
 
-  Map<String, dynamic> toMap() => {
+  Map<String?, dynamic> toJson() => {
         "id": id,
         "cat_id": catId,
+        "subcat_id": subcatId,
+        "brand_id": brandId,
         "shop_type": shopType,
         "shop_id": shopId,
         "type": type,
@@ -107,18 +135,50 @@ class Product {
         "status": status,
         "image": image,
         "has_units": hasUnits,
+        "units": List<dynamic>.from(units!.map((x) => x.toJson())),
       };
-
-  toJson() {}
 }
 
-enum Status { AVAILABLE }
+class SuperMarketUnitModel {
+  SuperMarketUnitModel({
+    this.id,
+    this.productId,
+    this.name,
+    this.price,
+    this.offerprice,
+    this.dispOrder,
+    this.status,
+  });
 
-final statusValues = EnumValues({"Available": Status.AVAILABLE});
+  int? id;
+  int? productId;
+  String? name;
+  int? price;
+  int? offerprice;
+  int? dispOrder;
+  String? status;
 
-enum Type { EMPTY, VEG }
+  factory SuperMarketUnitModel.fromJson(Map<String?, dynamic> json) =>
+      SuperMarketUnitModel(
+        id: json["id"],
+        productId: json["product_id"],
+        name: json["name"],
+        price: json["price"],
+        offerprice: json["offerprice"],
+        dispOrder: json["disp_order"],
+        status: json["status"],
+      );
 
-final typeValues = EnumValues({"": Type.EMPTY, "Veg": Type.VEG});
+  Map<String?, dynamic> toJson() => {
+        "id": id,
+        "product_id": productId,
+        "name": name,
+        "price": price,
+        "offerprice": offerprice,
+        "disp_order": dispOrder,
+        "status": status,
+      };
+}
 
 class Shop {
   Shop({
@@ -157,12 +217,14 @@ class Shop {
     this.franchiseCommession,
     this.adminCommession,
     this.status,
+    this.hasTax,
+    this.taxValue,
     this.logo,
     this.banner,
     this.photo,
     this.sign,
-    this.createdAt,
-    this.updatedAt,
+    this.latitude,
+    this.longitude,
   });
 
   int? id;
@@ -200,14 +262,16 @@ class Shop {
   int? franchiseCommession;
   int? adminCommession;
   String? status;
+  String? hasTax;
+  int? taxValue;
   String? logo;
   String? banner;
   String? photo;
   String? sign;
-  DateTime? createdAt;
-  DateTime? updatedAt;
+  String? latitude;
+  String? longitude;
 
-  factory Shop.fromJson(Map<String, dynamic> json) => Shop(
+  factory Shop.fromJson(Map<String?, dynamic> json) => Shop(
         id: json["id"],
         name: json["name"],
         ownerName: json["owner_name"],
@@ -243,15 +307,17 @@ class Shop {
         franchiseCommession: json["franchise_commession"],
         adminCommession: json["admin_commession"],
         status: json["status"],
+        hasTax: json["has_tax"],
+        taxValue: json["tax_value"],
         logo: json["logo"],
         banner: json["banner"],
         photo: json["photo"],
         sign: json["sign"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
+        latitude: json["latitude"],
+        longitude: json["longitude"],
       );
 
-  Map<String, dynamic> toJson() => {
+  Map<String?, dynamic> toJson() => {
         "id": id,
         "name": name,
         "owner_name": ownerName,
@@ -287,25 +353,13 @@ class Shop {
         "franchise_commession": franchiseCommession,
         "admin_commession": adminCommession,
         "status": status,
+        "has_tax": hasTax,
+        "tax_value": taxValue,
         "logo": logo,
         "banner": banner,
         "photo": photo,
         "sign": sign,
-        "created_at": createdAt!.toIso8601String(),
-        "updated_at": updatedAt!.toIso8601String(),
+        "latitude": latitude,
+        "longitude": longitude,
       };
-}
-
-class EnumValues<T> {
-  Map<String, T>? map;
-  Map<T, String>? reverseMap;
-
-  EnumValues(this.map);
-
-  Map<T, String>? get reverse {
-    if (reverseMap == null) {
-      reverseMap = map!.map((k, v) => new MapEntry(v, k));
-    }
-    return reverseMap;
-  }
 }

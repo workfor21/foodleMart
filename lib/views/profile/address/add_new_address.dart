@@ -51,8 +51,14 @@ class _AddNewAddressState extends State<AddNewAddress> {
         appBar: AppBar(
             elevation: 0,
             flexibleSpace: Container(
-                decoration:
-                    BoxDecoration(color: Color.fromRGBO(246, 219, 59, 1))),
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[
+                  Color.fromRGBO(246, 219, 59, 1),
+                  Color.fromARGB(255, 246, 227, 59)
+                ]))),
             // automaticallyImplyLeading: false,
             actions: [
               Padding(
@@ -103,7 +109,17 @@ class _AddNewAddressState extends State<AddNewAddress> {
             ],
             leading: IconButton(
                 onPressed: () {
+                  // Navigator.pushNamedAndRemoveUntil(
+                  //               context, '/mainScreen', (route) {
+                  //             print('rout name  ${route.settings.name}');
+                  //             return false;
+                  //           });
                   Navigator.pop(context);
+                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  //   content: Text('Address Added Sucessfull'),
+                  //   duration: Duration(seconds: 2),
+                  // ));
+                  // Navigator.pushNamed(context, '/your-address');
                 },
                 icon: Icon(Icons.arrow_back, color: Colors.black)),
             title:
@@ -113,7 +129,7 @@ class _AddNewAddressState extends State<AddNewAddress> {
                   padding: const EdgeInsets.only(
                       left: 40, top: 5, bottom: 5, right: 30),
                   width: double.infinity,
-                  color: Color.fromARGB(255, 246, 227, 59),
+                  color: Color.fromARGB(255, 252, 235, 82),
                   child: Text(
                     "Add New Address",
                     style: TextStyle(fontWeight: FontWeight.w500),
@@ -274,7 +290,7 @@ class AddAddressTextfield extends StatelessWidget {
         style: TextStyle(color: Colors.black),
         controller: controller,
         decoration: InputDecoration(
-          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14.sp),
           hintText: hintText,
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),

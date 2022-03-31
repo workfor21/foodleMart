@@ -21,8 +21,14 @@ class _YourAddressState extends State<YourAddress> {
         appBar: AppBar(
             elevation: 0,
             flexibleSpace: Container(
-                decoration:
-                    BoxDecoration(color: Color.fromRGBO(246, 219, 59, 1))),
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[
+                  Color.fromRGBO(246, 219, 59, 1),
+                  Color.fromARGB(255, 246, 227, 59)
+                ]))),
             // automaticallyImplyLeading: false,
             leading: IconButton(
                 onPressed: () {
@@ -36,7 +42,7 @@ class _YourAddressState extends State<YourAddress> {
                   padding: const EdgeInsets.only(
                       left: 40, top: 5, bottom: 5, right: 30),
                   width: double.infinity,
-                  color: Color.fromARGB(255, 246, 227, 59),
+                  color: Color.fromARGB(255, 252, 235, 82),
                   child: Text(
                     "Manage Address",
                     style: TextStyle(fontWeight: FontWeight.w500),
@@ -102,7 +108,13 @@ class AddressBody extends HookWidget {
               height: 45.h,
               width: 115.w,
               decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 243, 207, 0),
+                  gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: <Color>[
+                        Color.fromRGBO(246, 219, 59, 1),
+                        Color.fromARGB(255, 246, 227, 59),
+                      ]),
                   borderRadius: BorderRadius.circular(8)),
               child: Center(child: Text("Add Address"))),
         ),
@@ -154,14 +166,14 @@ class SelectableAddressWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(addresstype,
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      style: TextStyle(
+                          fontSize: 16.sp, fontWeight: FontWeight.w600)),
                   SizedBox(height: 5.h),
-                  Text(address, style: TextStyle(fontSize: 12)),
+                  Text(address, style: TextStyle(fontSize: 12.sp)),
                   SizedBox(height: 5.h),
-                  Text(phone, style: TextStyle(fontSize: 12)),
+                  Text(phone, style: TextStyle(fontSize: 12.sp)),
                   SizedBox(height: 5.h),
-                  Text(pincode, style: TextStyle(fontSize: 12)),
+                  Text(pincode, style: TextStyle(fontSize: 12.sp)),
                 ],
               ),
             ),
@@ -180,7 +192,7 @@ class SelectableAddressWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(5)),
                       child: Text("Edit",
                           style: TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.w600))),
+                              fontSize: 12.sp, fontWeight: FontWeight.w600))),
                 )),
             Expanded(
               flex: 2,

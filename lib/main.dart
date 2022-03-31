@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foodle_mart/config/routes/routes.dart';
 import 'package:foodle_mart/provider/cart_charges.dart';
+import 'package:foodle_mart/provider/cart_notify_provider.dart';
+import 'package:foodle_mart/provider/getLocation_provider.dart';
 import 'package:foodle_mart/provider/get_otp_details_provider.dart';
 import 'package:foodle_mart/provider/phone_number_provider.dart';
 import 'package:foodle_mart/provider/pincode_provider.dart';
 import 'package:foodle_mart/provider/pincode_search_provider.dart';
+import 'package:foodle_mart/provider/product_map_provider.dart';
 import 'package:foodle_mart/provider/search_all_provider.dart';
 import 'package:foodle_mart/provider/total_amount_provider.dart';
 import 'package:foodle_mart/views/authentication/phone.dart';
@@ -27,7 +30,10 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => pincodeProvider()),
         ChangeNotifierProvider(create: (_) => PincodeSearchProvider()),
         ChangeNotifierProvider(create: (_) => SearchAllProvider()),
-        ChangeNotifierProvider(create: (_) => TotalAmount())
+        ChangeNotifierProvider(create: (_) => TotalAmount()),
+        ChangeNotifierProvider(create: (_) => ProductMapProvider()),
+        // ChangeNotifierProvider(create: (_) => GetLocation()),
+        ChangeNotifierProvider(create: (_) => CartNotifyProvider())
       ],
       builder: (context, child) {
         // var userId = Provider.of<LoggedIn>(context).userId;
@@ -45,7 +51,7 @@ Future<void> main() async {
                   debugShowCheckedModeBanner: false,
                   home: DefaultTabController(length: 4, child: Phone()),
                   initialRoute: userId.toString().isEmpty || userId == null
-                      ? '/login'
+                      ? '/phone'
                       : '/mainScreen',
                   onGenerateRoute: Routes.generateRoute,
                 ));

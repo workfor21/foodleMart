@@ -5,6 +5,7 @@ class RoutePath {
   static const String login = '/login';
   static const String mainScreen = '/mainScreen';
   static const String cart = '/cart';
+  static const String orders = '/orders';
   static const String viewall = '/viewall';
   static const String nearYou = '/near-you';
   static const String notification = '/notification';

@@ -6,24 +6,34 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foodle_mart/models/order_list_model.dart';
-import 'package:foodle_mart/models/orders_model.dart';
 import 'package:foodle_mart/repository/customer_repo.dart';
 import 'package:foodle_mart/views/cart/cart.dart';
 import 'package:foodle_mart/views/notification/notification.dart';
 import 'package:foodle_mart/widgets/search_button.dart';
 
-class Orders extends StatelessWidget {
+class Orders extends StatefulWidget {
   static const routeName = '/orders';
   const Orders({Key? key}) : super(key: key);
 
+  @override
+  State<Orders> createState() => _OrdersState();
+}
+
+class _OrdersState extends State<Orders> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
             elevation: 0,
             flexibleSpace: Container(
-                decoration:
-                    BoxDecoration(color: Color.fromRGBO(246, 219, 59, 1))),
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[
+                  Color.fromRGBO(246, 219, 59, 1),
+                  Color.fromARGB(255, 246, 227, 59)
+                ]))),
             automaticallyImplyLeading: false,
             title: Image.asset("assets/images/foodle_logo.png", width: 90),
             actions: [
@@ -51,15 +61,15 @@ class Orders extends StatelessWidget {
                         padding: const EdgeInsets.only(
                             left: 40, top: 5, bottom: 5, right: 30),
                         width: double.infinity,
-                        color: Color.fromARGB(255, 246, 227, 59),
+                        color: Color.fromARGB(255, 252, 235, 82),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Your Orders",
+                              "Your Items",
                               style: TextStyle(fontWeight: FontWeight.w500),
                             ),
-                            Image.asset("assets/icons/filter.png")
+                            // Image.asset("assets/icons/filter.png")
                           ],
                         ))
                   ],
@@ -97,15 +107,11 @@ class Orders extends StatelessWidget {
                                 child: CachedNetworkImage(
                                   imageUrl:
                                       "https://ebshosting.co.in/${orders.shop?.logo}",
-                                  placeholder: (context, url) => Image.network(
-                                      "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png",
-                                      fit: BoxFit.cover,
-                                      height: 120.h),
                                   errorWidget: (context, url, error) =>
                                       Image.network(
                                           "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png",
                                           fit: BoxFit.cover,
-                                          height: 120.h),
+                                          height: 100.h),
                                 ),
                               ),
                               // Image.network(
@@ -126,15 +132,15 @@ class Orders extends StatelessWidget {
                                 children: [
                                   Text(orders.shop!.name ?? '',
                                       style: TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 16.sp,
                                           fontWeight: FontWeight.w600)),
                                   SizedBox(height: 5.h),
                                   Text(orders.shop!.deliveryTime ?? '',
-                                      style: TextStyle(fontSize: 12)),
+                                      style: TextStyle(fontSize: 12.sp)),
                                   SizedBox(height: 8.h),
                                   Text(orders.status ?? 'pending',
                                       style: TextStyle(
-                                          fontSize: 12, color: Colors.red)),
+                                          fontSize: 12.sp, color: Colors.red)),
                                 ],
                               ),
                             ),
@@ -152,12 +158,40 @@ class Orders extends StatelessWidget {
                                 children: [
                                   IconButton(
                                       onPressed: () {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(SnackBar(
-                                          content: Text('Order Canceled.'),
-                                          duration: Duration(seconds: 1),
-                                        ));
-                                        print("close");
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: Text('Please Confirm.'),
+                                                content: Text(
+                                                    'Are you sure to remove  the order.'),
+                                                actions: [
+                                                  TextButton(
+                                                      onPressed: () async {
+                                                        // var response = await CartApi.removeCart(cartId);
+                                                        // if (response == true) {
+                                                        Navigator.pop(context);
+                                                        setState(() {});
+                                                        ScaffoldMessenger.of(
+                                                                context)
+                                                            .showSnackBar(
+                                                                SnackBar(
+                                                          content: Text(
+                                                              'Order Canceled.'),
+                                                          duration: Duration(
+                                                              seconds: 1),
+                                                        ));
+                                                        print("close");
+                                                        //   print(response);
+                                                        // }
+                                                      },
+                                                      child: Text('Yes')),
+                                                  TextButton(
+                                                      onPressed: () {},
+                                                      child: Text('No')),
+                                                ],
+                                              );
+                                            });
                                       },
                                       icon: Icon(Icons.cancel_rounded,
                                           size: 20,
@@ -174,7 +208,7 @@ class Orders extends StatelessWidget {
                   Center(
                       child: Text('No orders yet!!',
                           style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600)));
+                              fontSize: 14.sp, fontWeight: FontWeight.w600)));
             }
           },
         ));

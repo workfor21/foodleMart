@@ -5,13 +5,13 @@ import 'package:foodle_mart/models/address_model.dart';
 import 'package:foodle_mart/models/cart_modal.dart';
 import 'package:foodle_mart/models/home_model.dart';
 import 'package:foodle_mart/models/order_list_model.dart';
-import 'package:foodle_mart/models/orders_model.dart';
 import 'package:foodle_mart/models/pincode_model.dart';
 import 'package:foodle_mart/models/post_model.dart';
 import 'package:foodle_mart/models/res_model.dart';
 import 'package:foodle_mart/models/restaurant_category_modal.dart';
 import 'package:foodle_mart/models/search_state_model.dart';
 import 'package:foodle_mart/models/supermarket_model.dart';
+import 'package:foodle_mart/models/user_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,9 +27,23 @@ class Preference {
     final prefs = await SharedPreferences.getInstance();
     return prefs.remove(data);
   }
+
+  static addPrefs(data, value) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.setString(data, value);
+  }
 }
 
 class HomeApi {
+  static Future<UserModel?> userProfile() async {
+    final userId = await Preference.getPrefs("Id");
+    var response =
+        await http.post(Uri.parse(Api.user.profile), body: {'user_id': userId});
+    Map<String, dynamic> data = json.decode(response.body);
+
+    return UserModel.fromJson(data);
+  }
+
   static Future<List<CategoryModel>?> categories() async {
     try {
       final pincode = await Preference.getPrefs("pincode");
@@ -111,6 +125,7 @@ class HomeApi {
       });
 
       var responseBody = json.decode(response.body);
+      print(responseBody['restproducts']);
 
       List<RestproductModel> productsList = [];
       for (var i in responseBody['restproducts']) {
@@ -121,10 +136,11 @@ class HomeApi {
         i["status"] = false;
         productsList.add(RestproductModel.fromJson(i));
       }
+      print('working');
 
       return productsList;
     } catch (e) {
-      return null;
+      return [];
     }
   }
 
@@ -177,7 +193,7 @@ class HomeApi {
 
       return supermarketList;
     } catch (e) {
-      return null;
+      return [];
     }
   }
 
@@ -389,12 +405,9 @@ class RestaurantApi {
       print(id);
       final pincode = await Preference.getPrefs("pincode");
       final userId = await Preference.getPrefs("Id");
-      var response = await http
-          .post(Uri.parse(Api.restaurant.restaurantCagegory(id)), body: {
-        "user_id": userId,
-        "pincode": pincode.toString().isEmpty ? "679577" : pincode,
-        "limit": "10"
-      });
+      var response = await http.post(
+          Uri.parse(Api.restaurant.restaurantCagegory(id)),
+          body: {"user_id": userId, "pincode": pincode, "limit": "10"});
 
       var responseBody = json.decode(response.body);
 
@@ -474,24 +487,36 @@ class SupermarketApi {
   }
 }
 
+//
 //**************//
 //Cart api
 class CartApi {
   static Future addToCart(type, productId, shopId, unitId) async {
+    print('///////////////////');
     print(type);
     print(productId);
     print(shopId);
+    print(unitId);
+    print('///////////////////');
+
     final userId = await Preference.getPrefs("Id");
+
     var response = await http.post(Uri.parse(Api.cart.addtocart), body: {
-      "type": type,
-      "product_id": productId,
+      "type": type.toString(),
+      "product_id": productId.toString(),
       "user_id": userId,
-      "shop_id": shopId,
-      "unit_id": unitId,
+      "shop_id": shopId.toString(),
+      "unit_id": unitId.toString(),
       "quantity": "1"
     });
+    try {
+      await CartApi.updateCartinSharedPreferences();
+    } catch (e) {
+      print('Error' + e.toString());
+    }
+
     var responseBody = json.decode(response.body);
-    print("response" + responseBody['sts']);
+    print('cart added model' + responseBody.toString());
 
     if (responseBody['sts'] == '01') {
       return true;
@@ -500,33 +525,43 @@ class CartApi {
     }
   }
 
+  static Future updateCartinSharedPreferences() async {
+    final userId = await Preference.getPrefs("Id");
+    var presentCart =
+        await http.post(Uri.parse(Api.cart.getcart), body: {"user_id": userId});
+    var presentCartBody = json.encode(presentCart.body);
+    // print('cartModel' + presentCartBody.toString());
+    await Preference.addPrefs('cart', presentCartBody);
+    print("sharedPreferences ::::::: ${await Preference.getPrefs('cart')}");
+  }
+
   static Future<CartModal?> getCart() async {
-    try {
-      final userId = await Preference.getPrefs("Id");
-      var response = await http
-          .post(Uri.parse(Api.cart.getcart), body: {"user_id": userId});
-      // var responseBody = json.decode(response.body);
-      // print('cart api');
-      // print(responseBody['cart']);
+    // try {
+    final userId = await Preference.getPrefs("Id");
+    var response =
+        await http.post(Uri.parse(Api.cart.getcart), body: {"user_id": userId});
+    // var responseBody = json.decode(response.body);
+    // print('cart api');
+    // print(responseBody['cart']);
 
-      // List<CartListModal> cartList = [];
-      // for (var i in responseBody['cart']) {
-      //   cartList.add(CartListModal.fromJson(i));
-      // }
+    // List<CartListModal> cartList = [];
+    // for (var i in responseBody['cart']) {
+    //   cartList.add(CartListModal.fromJson(i));
+    // }
 
-      print('cart respons :::: ${response.body}');
-      Map<String, dynamic> data = json.decode(response.body);
-
-      return CartModal.fromJson(data);
-    } catch (e) {
-      return null;
-    }
+    print('cart respons :::: ${response.body}');
+    Map<String, dynamic> data = json.decode(response.body);
+    return CartModal.fromJson(data);
+    // } catch (e) {
+    //   return null;
+    // }
   }
 
   static Future removeCart(cartId) async {
     try {
       var response =
           await http.post(Uri.parse(Api.cart.remove), body: {"cartid": cartId});
+      await CartApi.updateCartinSharedPreferences();
       var responseBody = json.decode(response.body);
       print(responseBody);
       if (responseBody['sts'] == "00") {

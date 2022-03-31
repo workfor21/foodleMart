@@ -53,8 +53,8 @@ class SignUp extends StatelessWidget {
                 children: [
                   SizedBox(height: 40.h),
                   Text("Hello!",
-                      style:
-                          TextStyle(fontSize: 25, color: Colors.grey.shade500)),
+                      style: TextStyle(
+                          fontSize: 25.sp, color: Colors.grey.shade500)),
                   SizedBox(height: 10),
                   SizedBox(
                     width: 200.w,
@@ -62,7 +62,7 @@ class SignUp extends StatelessWidget {
                         "Enter your informations below to join out family!",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize: 16, color: Colors.grey.shade500)),
+                            fontSize: 16.sp, color: Colors.grey.shade500)),
                   ),
                   SizedBox(height: 47.h),
                   FormFieldWidget(
@@ -107,7 +107,7 @@ class SignUp extends StatelessWidget {
                     TextSpan(
                         text: "Login",
                         style:
-                            TextStyle(color: Color.fromARGB(150, 139, 195, 74)),
+                            TextStyle(color: Color.fromARGB(255, 246, 227, 59)),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Navigator.pushNamed(context, '/login');
@@ -127,13 +127,42 @@ class SignUp extends StatelessWidget {
                           text: "By continuing, you agree to our ",
                           style: TextStyle(color: Colors.grey.shade600)),
                       TextSpan(
-                          text: "Terms of Services and Privacy Policy",
+                          text: "Terms of Services ",
                           style: TextStyle(
-                              color: Color.fromARGB(255, 135, 167, 48)),
+                              color: Color.fromARGB(255, 246, 227, 59)),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () async {
                               print("redirect to url");
-                              const url = 'https://twitter.com';
+                              const url =
+                                  'https://ebshosting.co.in/app/contactus/terms';
+                              UrlLauncher.launhcUrl(url);
+                            }),
+                      TextSpan(
+                          text: "and",
+                          style: TextStyle(color: Colors.grey.shade600)),
+                      TextSpan(
+                          text: " Privacy Policy ",
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 246, 227, 59)),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              print(" redirect to url");
+                              const url =
+                                  'https://ebshosting.co.in/app/contactus/privacy';
+                              UrlLauncher.launhcUrl(url);
+                            }),
+                      TextSpan(
+                          text: "and",
+                          style: TextStyle(color: Colors.grey.shade600)),
+                      TextSpan(
+                          text: " Return Policy",
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 246, 227, 59)),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              print(" redirect to url");
+                              const url =
+                                  'https://ebshosting.co.in/app/contactus/return';
                               UrlLauncher.launhcUrl(url);
                             })
                     ],
@@ -227,7 +256,7 @@ class RegisterButton extends HookWidget {
               child: Text("Sign Up",
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       letterSpacing: .5)))
           : FittedBox(

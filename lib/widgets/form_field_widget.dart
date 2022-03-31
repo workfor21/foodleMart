@@ -22,7 +22,7 @@ class FormFieldWidget extends StatelessWidget {
         style: TextStyle(color: Colors.white),
         controller: controller,
         decoration: InputDecoration(
-          hintStyle: TextStyle(color: Colors.grey.shade800, fontSize: 14),
+          hintStyle: TextStyle(color: Colors.grey.shade800, fontSize: 14.sp),
           hintText: hintText,
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),

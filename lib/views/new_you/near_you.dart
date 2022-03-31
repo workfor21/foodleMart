@@ -21,10 +21,16 @@ class NearYou extends StatelessWidget {
         appBar: AppBar(
             elevation: 0,
             flexibleSpace: Container(
-                decoration:
-                    BoxDecoration(color: Color.fromRGBO(246, 219, 59, 1))),
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[
+                  Color.fromRGBO(246, 219, 59, 1),
+                  Color.fromARGB(255, 246, 227, 59),
+                ]))),
             automaticallyImplyLeading: false,
-            title: Image.asset("assets/images/foodle_logo.png", width: 90),
+            title: Image.asset("assets/icons/logo1.png"),
             actions: [
               IconButton(
                   onPressed: () {
@@ -55,7 +61,7 @@ class NearYou extends StatelessWidget {
                         padding: const EdgeInsets.only(
                             left: 40, top: 5, bottom: 5, right: 30),
                         width: double.infinity,
-                        color: Color.fromARGB(255, 246, 227, 59),
+                        color: Color.fromARGB(255, 252, 235, 82),
                         child: Text(
                           arguments == true
                               ? 'Restuarants near you'
@@ -130,7 +136,7 @@ class NearYou extends StatelessWidget {
                                       ),
                                       SizedBox(height: 5.h),
                                       Text(resturants.deliveryTime.toString(),
-                                          style: TextStyle(fontSize: 12)),
+                                          style: TextStyle(fontSize: 12.sp)),
                                       SizedBox(height: 5.h),
                                       // StarRating(
                                       //   rating: resturants.rating!.toDouble(),

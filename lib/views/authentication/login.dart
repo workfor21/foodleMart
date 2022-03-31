@@ -3,8 +3,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:foodle_mart/repository/customer_repo.dart';
 import 'package:foodle_mart/provider/phone_number_provider.dart';
+import 'package:foodle_mart/provider/pincode_provider.dart';
 import 'package:foodle_mart/repository/customer_repo.dart';
 import 'package:foodle_mart/utils/shimmer_widget.dart';
 import 'package:foodle_mart/utils/url_launcher.dart';
@@ -25,6 +25,17 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final _passwordController = TextEditingController();
   final _emailController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      // context.read<GetLocation>().getCurrentLocation();
+      context.read<pincodeProvider>().pincode.isEmpty
+          ? context.read<pincodeProvider>().setDummy('location')
+          : context.read<pincodeProvider>().getPincode('679586');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,15 +65,15 @@ class _LoginState extends State<Login> {
                 children: [
                   SizedBox(height: 120.h),
                   Text("Hello Again!",
-                      style:
-                          TextStyle(fontSize: 25, color: Colors.grey.shade500)),
+                      style: TextStyle(
+                          fontSize: 25.sp, color: Colors.grey.shade500)),
                   SizedBox(height: 10),
                   SizedBox(
                     width: 200.w,
                     child: Text("Welcome back you've been missed !",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize: 16, color: Colors.grey.shade500)),
+                            fontSize: 16.sp, color: Colors.grey.shade500)),
                   ),
                   SizedBox(height: 47.h),
                   FormFieldWidget(
@@ -88,7 +99,7 @@ class _LoginState extends State<Login> {
                         TextSpan(
                             text: "reset password",
                             style: TextStyle(
-                                color: Color.fromARGB(150, 139, 195, 74)),
+                                color: Color.fromARGB(255, 246, 227, 59)),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 print('reset password');
@@ -115,19 +126,48 @@ class _LoginState extends State<Login> {
                           text: "By continuing, you agree to our ",
                           style: TextStyle(color: Colors.grey.shade600)),
                       TextSpan(
-                          text: "Terms of Services and Privacy Policy",
+                          text: "Terms of Services ",
                           style: TextStyle(
-                              color: Color.fromARGB(255, 135, 167, 48)),
+                              color: Color.fromARGB(255, 246, 227, 59)),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () async {
                               print("redirect to url");
-                              const url = 'https://twitter.com';
+                              const url =
+                                  'https://ebshosting.co.in/app/contactus/terms';
+                              UrlLauncher.launhcUrl(url);
+                            }),
+                      TextSpan(
+                          text: "and",
+                          style: TextStyle(color: Colors.grey.shade600)),
+                      TextSpan(
+                          text: " Privacy Policy ",
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 246, 227, 59)),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              print(" redirect to url");
+                              const url =
+                                  'https://ebshosting.co.in/app/contactus/privacy';
+                              UrlLauncher.launhcUrl(url);
+                            }),
+                      TextSpan(
+                          text: "and",
+                          style: TextStyle(color: Colors.grey.shade600)),
+                      TextSpan(
+                          text: " Return Policy",
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 246, 227, 59)),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              print(" redirect to url");
+                              const url =
+                                  'https://ebshosting.co.in/app/contactus/return';
                               UrlLauncher.launhcUrl(url);
                             })
                     ],
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -167,15 +207,8 @@ class LoginButton extends HookWidget {
                   if (response == true) {
                     state.value = true;
                     Navigator.pop(context);
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) =>
-                                prefs.getString("pincode").toString().isEmpty ||
-                                        prefs.getString("pincode") == null
-                                    ? ShimmerWidget()
-                                    : MainScreen()));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => MainScreen()));
                   } else if (response == "Error") {
                     state.value = true;
                     Scaffold.of(context).showSnackBar(SnackBar(
@@ -190,7 +223,7 @@ class LoginButton extends HookWidget {
               child: Text("Continue",
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       letterSpacing: .5)))
           : FittedBox(

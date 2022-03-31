@@ -30,143 +30,135 @@ class _ShimmerWidgetState extends State<ShimmerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return false;
-      },
-      child: Scaffold(
-          appBar: AppBar(
-              elevation: 0,
-              flexibleSpace: Container(
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: <Color>[
-                    Color.fromRGBO(166, 206, 57, 1),
-                    Color.fromRGBO(72, 170, 152, 1)
-                  ]))),
-              automaticallyImplyLeading: false,
-              title: Image.asset("assets/icons/logo1.png"),
-              actions: [
-                IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.notifications_none, color: Colors.black)),
-                IconButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/cart');
-                    },
-                    icon: Icon(Icons.local_grocery_store_outlined,
-                        color: Colors.black)),
-              ],
-              bottom: PreferredSize(
-                  child: Column(
-                    children: [
-                      SearchButton(),
-                      Container(
-                          padding: const EdgeInsets.only(
-                              left: 40, top: 5, bottom: 5),
-                          width: double.infinity,
-                          color: Color.fromRGBO(201, 228, 125, 1),
-                          child: BottomPincodeSheet())
-                    ],
-                  ),
-                  preferredSize: Size.fromHeight(80.h))),
-          body: SizedBox(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  AspectRatio(
-                      aspectRatio: 10 / 4.5,
-                      child: Shimmer.fromColors(
+    return Scaffold(
+        appBar: AppBar(
+            elevation: 0,
+            flexibleSpace: Container(
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[
+                  Color.fromRGBO(166, 206, 57, 1),
+                  Color.fromRGBO(72, 170, 152, 1)
+                ]))),
+            automaticallyImplyLeading: false,
+            title: Image.asset("assets/icons/logo1.png"),
+            actions: [
+              IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.notifications_none, color: Colors.black)),
+              IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.local_grocery_store_outlined,
+                      color: Colors.black)),
+            ],
+            bottom: PreferredSize(
+                child: Column(
+                  children: [
+                    SearchButton(),
+                    Container(
+                        padding:
+                            const EdgeInsets.only(left: 40, top: 5, bottom: 5),
+                        width: double.infinity,
+                        color: Color.fromRGBO(201, 228, 125, 1),
+                        child: Container())
+                  ],
+                ),
+                preferredSize: Size.fromHeight(80.h))),
+        body: SizedBox(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                AspectRatio(
+                    aspectRatio: 10 / 4.5,
+                    child: Shimmer.fromColors(
+                      baseColor: Colors.grey.shade300,
+                      highlightColor: Colors.grey.shade100,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            image: DecorationImage(
+                                image:
+                                    AssetImage("assets/images/carousal1.png"),
+                                fit: BoxFit.cover)),
+                      ),
+                    )),
+                SizedBox(height: 20),
+                Container(
+                  // width: double.infinity,
+                  height: 50,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 7,
+                    itemBuilder: ((context, index) {
+                      return Shimmer.fromColors(
                         baseColor: Colors.grey.shade300,
                         highlightColor: Colors.grey.shade100,
-                        child: Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              image: DecorationImage(
-                                  image:
-                                      AssetImage("assets/images/carousal1.png"),
-                                  fit: BoxFit.cover)),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 10, left: 18),
+                          child: ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
+                              child: Image.asset("assets/images/carousal1.png",
+                                  fit: BoxFit.cover,
+                                  width: 50.w,
+                                  height: 50.h)),
                         ),
-                      )),
-                  SizedBox(height: 20),
-                  Container(
-                    // width: double.infinity,
-                    height: 50,
-                    child: ListView.builder(
-                      shrinkWrap: true,
+                      );
+                    }),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Shimmer.fromColors(
+                    baseColor: Colors.grey.shade300,
+                    highlightColor: Colors.grey.shade100,
+                    child: Headerwidget(title: "Top Restaurants")),
+                SizedBox(height: 20),
+                SizedBox(
+                  height: 170,
+                  child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: 7,
+                      shrinkWrap: true,
+                      itemCount: 5,
                       itemBuilder: ((context, index) {
                         return Shimmer.fromColors(
                           baseColor: Colors.grey.shade300,
                           highlightColor: Colors.grey.shade100,
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 10, left: 18),
-                            child: ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: Image.asset(
-                                    "assets/images/carousal1.png",
-                                    fit: BoxFit.cover,
-                                    width: 50.w,
-                                    height: 50.h)),
+                          child: Cards(
+                            route: '',
+                            isRating: false,
                           ),
                         );
-                      }),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Shimmer.fromColors(
-                      baseColor: Colors.grey.shade300,
-                      highlightColor: Colors.grey.shade100,
-                      child: Headerwidget(title: "Top Restaurants")),
-                  SizedBox(height: 20),
-                  SizedBox(
-                    height: 170,
-                    child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        shrinkWrap: true,
-                        itemCount: 5,
-                        itemBuilder: ((context, index) {
-                          return Shimmer.fromColors(
-                            baseColor: Colors.grey.shade300,
-                            highlightColor: Colors.grey.shade100,
-                            child: Cards(
-                              route: '',
-                              isRating: false,
-                            ),
-                          );
-                        })),
-                  ),
-                  SizedBox(height: 20),
-                  Shimmer.fromColors(
-                      baseColor: Colors.grey.shade300,
-                      highlightColor: Colors.grey.shade100,
-                      child: Headerwidget(title: "Top Restaurants")),
-                  SizedBox(height: 20),
-                  SizedBox(
-                    height: 170,
-                    child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        shrinkWrap: true,
-                        itemCount: 5,
-                        itemBuilder: ((context, index) {
-                          return Shimmer.fromColors(
-                            baseColor: Colors.grey.shade300,
-                            highlightColor: Colors.grey.shade100,
-                            child: Cards(
-                              route: '',
-                              isRating: false,
-                            ),
-                          );
-                        })),
-                  ),
-                ],
-              ),
+                      })),
+                ),
+                SizedBox(height: 20),
+                Shimmer.fromColors(
+                    baseColor: Colors.grey.shade300,
+                    highlightColor: Colors.grey.shade100,
+                    child: Headerwidget(title: "Top Restaurants")),
+                SizedBox(height: 20),
+                SizedBox(
+                  height: 170,
+                  child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
+                      itemCount: 5,
+                      itemBuilder: ((context, index) {
+                        return Shimmer.fromColors(
+                          baseColor: Colors.grey.shade300,
+                          highlightColor: Colors.grey.shade100,
+                          child: Cards(
+                            route: '',
+                            isRating: false,
+                          ),
+                        );
+                      })),
+                ),
+              ],
             ),
-          )),
-    );
+          ),
+        ));
   }
 }
 
@@ -200,7 +192,7 @@ void show(BuildContext context) async {
                                 children: [
                                   Text("Selected pincode",
                                       style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 14.sp,
                                           fontWeight: FontWeight.w600)),
                                 ],
                               ),
@@ -224,6 +216,8 @@ void show(BuildContext context) async {
                                           PincodeModel pincodes = data[index];
                                           return GestureDetector(
                                             onTap: () async {
+                                              Navigator.pop(context);
+                                              Navigator.pop(context);
                                               Navigator.pushNamed(
                                                   context, '/mainScreen');
                                               final prefs =

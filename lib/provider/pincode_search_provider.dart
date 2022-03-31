@@ -26,9 +26,11 @@ class PincodeSearchProvider extends ChangeNotifier {
     }
 
     print(results);
+    print('search query :::' + _pincode);
 
     for (var i in results) {
       if (i.contains(_pincode)) {
+        //
         searchResults.add(i);
       }
     }

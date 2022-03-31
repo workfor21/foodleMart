@@ -57,14 +57,14 @@ class ProductModal {
 
   int? id;
   int? catId;
-  ShopType? shopType;
+  String? shopType;
   int? shopId;
   String? shopName;
-  Type? type;
+  String? type;
   String? name;
   int? price;
   int? offerprice;
-  Status? status;
+  String? status;
   String? image;
   String? hasUnits;
   List<Unit>? units;
@@ -72,14 +72,14 @@ class ProductModal {
   factory ProductModal.fromJson(Map<String, dynamic> json) => ProductModal(
         id: json["id"],
         catId: json["cat_id"],
-        shopType: shopTypeValues.map![json["shop_type"]],
+        shopType: json["shop_type"],
         shopId: json["shop_id"],
         shopName: json["shop_name"],
-        type: typeValues.map![json["type"]],
+        type: json["type"],
         name: json["name"],
         price: json["price"],
         offerprice: json["offerprice"],
-        status: statusValues.map![json["status"]],
+        status: json["status"],
         image: json["image"],
         hasUnits: json["has_units"],
         units: List<Unit>.from(json["units"].map((x) => Unit.fromJson(x))),
@@ -88,27 +88,19 @@ class ProductModal {
   Map<String, dynamic> toJson() => {
         "id": id,
         "cat_id": catId,
-        "shop_type": shopTypeValues.reverse![shopType],
+        "shop_type": shopType,
         "shop_id": shopId,
         "shop_name": shopName,
-        "type": typeValues.reverse![type],
+        "type": type,
         "name": name,
         "price": price,
         "offerprice": offerprice,
-        "status": statusValues.reverse![status],
+        "status": status,
         "image": image,
         "has_units": hasUnits,
         "units": List<dynamic>.from(units!.map((x) => x.toJson())),
       };
 }
-
-enum ShopType { RESTAURANT }
-
-final shopTypeValues = EnumValues({"Restaurant": ShopType.RESTAURANT});
-
-enum Status { AVAILABLE }
-
-final statusValues = EnumValues({"Available": Status.AVAILABLE});
 
 enum Type { NON_VEG, VEG }
 

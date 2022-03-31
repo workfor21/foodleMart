@@ -71,7 +71,7 @@ class Product {
   String status;
   String image;
   String hasUnits;
-  List<Unit> units;
+  List<UnitModel> units;
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
         id: json["id"],
@@ -85,7 +85,8 @@ class Product {
         status: json["status"],
         image: json["image"],
         hasUnits: json["has_units"],
-        units: List<Unit>.from(json["units"].map((x) => Unit.fromJson(x))),
+        units: List<UnitModel>.from(
+            json["units"].map((x) => UnitModel.fromJson(x))),
       );
 
   Map<String, dynamic> toMap() => {
@@ -104,8 +105,8 @@ class Product {
       };
 }
 
-class Unit {
-  Unit({
+class UnitModel {
+  UnitModel({
     required this.id,
     required this.productId,
     required this.name,
@@ -123,7 +124,7 @@ class Unit {
   int dispOrder;
   String status;
 
-  factory Unit.fromJson(Map<String, dynamic> json) => Unit(
+  factory UnitModel.fromJson(Map<String, dynamic> json) => UnitModel(
         id: json["id"],
         productId: json["product_id"],
         name: json["name"],

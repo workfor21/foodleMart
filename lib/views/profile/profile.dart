@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foodle_mart/models/user_model.dart';
 import 'package:foodle_mart/repository/customer_repo.dart';
 import 'package:foodle_mart/utils/url_launcher.dart';
 import 'package:foodle_mart/views/cart/cart.dart';
@@ -9,6 +10,7 @@ import 'package:foodle_mart/views/notification/notification.dart';
 import 'package:foodle_mart/views/profile/address/your_address.dart';
 import 'package:foodle_mart/widgets/header.dart';
 import 'package:share/share.dart';
+import 'package:shimmer/shimmer.dart';
 
 class Profile extends StatelessWidget {
   static const routeName = '/profile';
@@ -33,7 +35,7 @@ class Profile extends StatelessWidget {
                   ])),
             ),
             automaticallyImplyLeading: false,
-            title: Image.asset("assets/images/foodle_logo.png", width: 90),
+            title: Image.asset("assets/icons/logo1.png"),
             actions: [
               IconButton(
                   onPressed: () {
@@ -53,22 +55,60 @@ class Profile extends StatelessWidget {
                       color: Colors.black)),
             ],
             bottom: PreferredSize(
-              child: Column(children: [
-                ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
-                    child: Image.asset("assets/images/profile.png")),
-                Text("Janvi",
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                SizedBox(height: 5),
-                Text("janvi@gmail.com", style: TextStyle(fontSize: 12)),
-                SizedBox(height: 5),
-                Text("09467328823", style: TextStyle(fontSize: 12)),
-              ]),
+              child: FutureBuilder(
+                  future: HomeApi.userProfile(),
+                  builder: ((context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasData) {
+                      print('user profile ::: ' + snapshot.data.toString());
+                      UserModel user = snapshot.data;
+                      return Column(children: [
+                        ClipRRect(
+                            borderRadius: BorderRadius.circular(100),
+                            child: Image.asset("assets/images/profile.png")),
+                        Text(user.user!.name ?? '',
+                            style: TextStyle(
+                                fontSize: 16.sp, fontWeight: FontWeight.w600)),
+                        SizedBox(height: 5),
+                        Text(user.user!.email ?? '',
+                            style: TextStyle(fontSize: 12.sp)),
+                        SizedBox(height: 5),
+                        Text(user.user!.mobile ?? '',
+                            style: TextStyle(fontSize: 12.sp)),
+                      ]);
+                    } else {
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey.shade300,
+                        highlightColor: Colors.grey.shade100,
+                        child: Column(children: [
+                          ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
+                              child: Image.asset("assets/images/profile.png")),
+                          SizedBox(height: 10),
+                          Shimmer.fromColors(
+                              baseColor: Colors.grey.shade300,
+                              highlightColor: Colors.grey.shade100,
+                              child: Container(
+                                  height: 8, width: 55, color: Colors.grey)),
+                          SizedBox(height: 5),
+                          Shimmer.fromColors(
+                              baseColor: Colors.grey.shade300,
+                              highlightColor: Colors.grey.shade100,
+                              child: Container(
+                                  height: 8, width: 85, color: Colors.grey)),
+                          SizedBox(height: 5),
+                          Shimmer.fromColors(
+                              baseColor: Colors.grey.shade300,
+                              highlightColor: Colors.grey.shade100,
+                              child: Container(
+                                  height: 8, width: 65, color: Colors.grey)),
+                        ]),
+                      );
+                    }
+                  })),
               preferredSize: Size.fromHeight(200),
             )),
         body: Padding(
-          padding: const EdgeInsets.only(left: 20.0, top: 20),
+          padding: const EdgeInsets.only(left: 20.0, top: 20, right: 20),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,34 +120,27 @@ class Profile extends StatelessWidget {
                   child: Column(
                     children: [
                       ProfileButtons(
-                          title: "your order",
+                          title: "your cart",
                           image: 'assets/icons/order_history.png',
                           function: () {
                             print("your orders");
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (_) => Cart()));
+                            Navigator.pushNamed(context, '/cart');
                           }),
                       ProfileButtons(
                           title: "address book",
                           image: 'assets/icons/address.png',
                           function: () async {
-                            var states = await SearchApi.searchState();
-                            var district = await SearchApi.searchDistrict();
+                            // var states = await SearchApi.searchState();
+                            // var district = await SearchApi.searchDistrict();
                             print("address book");
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => YourAddress()));
+                            Navigator.pushNamed(context, '/your-address');
                           }),
                       ProfileButtons(
                           title: "notification",
                           image: 'assets/icons/notification.png',
                           function: () {
                             print("notification");
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => NotificationScreen()));
+                            Navigator.pushNamed(context, '/notification');
                           }),
                     ],
                   ),
@@ -135,7 +168,8 @@ class Profile extends StatelessWidget {
                           title: "about us",
                           image: 'assets/icons/info.png',
                           function: () {
-                            var url = "https://twitter.com";
+                            var url =
+                                "https://ebshosting.co.in/app/contactus/aboutus";
                             UrlLauncher.launhcUrl(url);
                             print("about us");
                           }),
@@ -175,10 +209,11 @@ class ProfileButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => function(),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
+    return Container(
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+      child: TextButton(
+        style: TextButton.styleFrom(primary: Colors.lightGreen),
+        onPressed: () => function(),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -190,11 +225,30 @@ class ProfileButtons extends StatelessWidget {
                 child: Image.asset(image, height: 25, width: 25)),
             SizedBox(width: 10),
             Container(
-                child:
-                    Text(title, style: TextStyle(fontWeight: FontWeight.w600))),
+                child: Text(title,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, color: Colors.black))),
           ],
         ),
       ),
     );
+    // Padding(
+    //   padding: const EdgeInsets.only(bottom: 8.0),
+    //   child: Row(
+    //     crossAxisAlignment: CrossAxisAlignment.center,
+    //     children: [
+    //       Container(
+    //           padding: const EdgeInsets.all(4),
+    //           decoration: BoxDecoration(
+    //               color: Colors.grey.shade200,
+    //               borderRadius: BorderRadius.circular(5)),
+    //           child: Image.asset(image, height: 25, width: 25)),
+    //       SizedBox(width: 10),
+    //       Container(
+    //           child:
+    //               Text(title, style: TextStyle(fontWeight: FontWeight.w600))),
+    //     ],
+    //   ),
+    // ),
   }
 }

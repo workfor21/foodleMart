@@ -33,7 +33,7 @@ class Phone extends StatelessWidget {
                 Column(
                   children: [
                     SizedBox(height: 180.h),
-                    Image.asset("assets/icons/logo.png",
+                    Image.asset("assets/images/foodle_logo.png",
                         height: 69.h, width: 160.w),
                     SizedBox(height: 47.h),
                     TextFormField(
@@ -89,7 +89,7 @@ class Phone extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 180.h),
+                SizedBox(height: 140.h),
                 SizedBox(
                   width: 235.w,
                   child: RichText(
@@ -100,13 +100,42 @@ class Phone extends StatelessWidget {
                             text: "By continuing, you agree to our ",
                             style: TextStyle(color: Colors.grey.shade600)),
                         TextSpan(
-                            text: "Terms of Services and Privacy Policy",
+                            text: "Terms of Services ",
                             style: TextStyle(
-                                color: Color.fromARGB(255, 135, 167, 48)),
+                                color: Color.fromARGB(255, 246, 227, 59)),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () async {
                                 print("redirect to url");
-                                const url = 'https://twitter.com';
+                                const url =
+                                    'https://ebshosting.co.in/app/contactus/terms';
+                                UrlLauncher.launhcUrl(url);
+                              }),
+                        TextSpan(
+                            text: "and",
+                            style: TextStyle(color: Colors.grey.shade600)),
+                        TextSpan(
+                            text: " Privacy Policy ",
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 246, 227, 59)),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () async {
+                                print(" redirect to url");
+                                const url =
+                                    'https://ebshosting.co.in/app/contactus/privacy';
+                                UrlLauncher.launhcUrl(url);
+                              }),
+                        TextSpan(
+                            text: "and",
+                            style: TextStyle(color: Colors.grey.shade600)),
+                        TextSpan(
+                            text: " Return Policy",
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 246, 227, 59)),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () async {
+                                print(" redirect to url");
+                                const url =
+                                    'https://ebshosting.co.in/app/contactus/return';
                                 UrlLauncher.launhcUrl(url);
                               })
                       ],
@@ -137,7 +166,7 @@ class PhoneButton extends HookWidget {
       width: double.infinity,
       height: 50,
       decoration: BoxDecoration(
-          color: Color.fromRGBO(246, 219, 59, 1),
+          color: Color.fromARGB(255, 246, 227, 59),
           borderRadius: BorderRadius.circular(10)),
       child: state.value
           ? TextButton(
@@ -149,6 +178,7 @@ class PhoneButton extends HookWidget {
                 if (response && phoneNumber.text.length == 10) {
                   state.value = true;
                   context.read<PhoneProvider>().getNumber(phoneNumber.text);
+                  Navigator.pop(context);
                   Navigator.push(
                       context, MaterialPageRoute(builder: (_) => Login()));
                 } else if (phoneNumber.text.isEmpty) {
@@ -170,7 +200,7 @@ class PhoneButton extends HookWidget {
               child: Text("Continue",
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       letterSpacing: .5)))
           : FittedBox(

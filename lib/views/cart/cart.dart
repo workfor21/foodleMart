@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foodle_mart/models/address_model.dart';
 import 'package:foodle_mart/models/cart_modal.dart';
 import 'package:foodle_mart/provider/cart_charges.dart';
+import 'package:foodle_mart/provider/cart_notify_provider.dart';
 import 'package:foodle_mart/provider/pincode_provider.dart';
 import 'package:foodle_mart/provider/total_amount_provider.dart';
 import 'package:foodle_mart/repository/customer_repo.dart';
@@ -47,8 +48,14 @@ class _CartState extends State<Cart> {
         appBar: AppBar(
             elevation: 0,
             flexibleSpace: Container(
-                decoration:
-                    BoxDecoration(color: Color.fromRGBO(246, 219, 59, 1))),
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[
+                  Color.fromRGBO(246, 219, 59, 1),
+                  Color.fromARGB(255, 246, 227, 59),
+                ]))),
             automaticallyImplyLeading: false,
             title: Image.asset("assets/images/foodle_logo.png", width: 90),
             bottom: PreferredSize(
@@ -68,7 +75,7 @@ class _CartState extends State<Cart> {
                         padding: const EdgeInsets.only(
                             left: 40, top: 5, bottom: 5, right: 30),
                         width: double.infinity,
-                        color: Color.fromARGB(255, 246, 227, 59),
+                        color: Color.fromARGB(255, 252, 235, 82),
                         child: Row(
                           children: [
                             Text("Delivery to :"),
@@ -103,18 +110,18 @@ class CartBody extends HookWidget {
   Widget build(BuildContext context) {
     context.read<TotalAmount>().GetAllAmounts();
     final totalAmount = useState(0);
-    return FutureBuilder(
+    return FutureBuilder<CartModal?>(
         future: CartApi.getCart(),
         builder: (context, AsyncSnapshot snapshot) {
-          print(snapshot);
+          print('cart snapshotData ::: ' + snapshot.data.toString());
           if (snapshot.hasData) {
             CartModal data = snapshot.data;
-            int length = data.cart.length;
+            int length = data.cart!.length;
             return Column(
               children: [
                 Container(
                   constraints:
-                      BoxConstraints(maxHeight: 470.h, minHeight: 420.h),
+                      BoxConstraints(maxHeight: 440.h, minHeight: 420.h),
                   // height: 470.h,
                   child: ListView.builder(
                       primary: true,
@@ -131,15 +138,20 @@ class CartBody extends HookWidget {
                                 border: Border.all(
                                     color: Colors.grey.shade200, width: 2.w)),
                             child: CalculateTheTotal(
-                              quantity: data.cart[index].quantity,
+                              quantity: data.cart![index].quantity ?? 1,
                               unitText:
-                                  ' (${data.cart[index].unitname.toString()})',
-                              cartId: data.cart[index].id.toString(),
+                                  ' (${data.cart![index].unitname.toString()})',
+                              cartId: data.cart![index].id.toString(),
                               image:
                                   "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png",
-                              title: data.cart[index].productname.toString(),
-                              discountprice: data.cart[index].price.toString(),
-                              price: data.cart[index].offerprice.toString(),
+                              title: data.cart![index].productname.toString(),
+                              discountprice: data.cart![index].price == ""
+                                  ? 0
+                                  : data.cart![index].price,
+                              price: data.cart![index].offerprice == ""
+                                  ? 0
+                                  : int.parse(
+                                      data.cart![index].offerprice ?? '0'),
                             ));
                       })),
                 ),
@@ -199,13 +211,13 @@ class CartBody extends HookWidget {
                 )
               ],
             );
-          } else if (snapshot.hasData == false) {
+          } else if (snapshot.data == 'no data') {
             return SizedBox(
-                height: 470.h, child: Center(child: Text('No data available')));
+                height: 470.h, child: Center(child: Text('No Data Available')));
           } else {
             return SizedBox(
                 height: 470.h,
-                child: Center(child: CircularProgressIndicator()));
+                child: Center(child: Text('No Products in cart')));
           }
         });
   }
@@ -217,8 +229,8 @@ class CalculateTheTotal extends HookWidget {
   String? cartId;
   String image;
   String title;
-  String discountprice;
-  String price;
+  dynamic discountprice;
+  int? price;
   CalculateTheTotal(
       {Key? key,
       this.quantity = 1,
@@ -227,8 +239,8 @@ class CalculateTheTotal extends HookWidget {
       this.image =
           "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png",
       this.title = "productName",
-      this.discountprice = "0",
-      this.price = "0"})
+      this.discountprice,
+      this.price})
       : super(key: key);
 
   @override
@@ -263,17 +275,17 @@ class CalculateTheTotal extends HookWidget {
             RichText(
                 text: TextSpan(children: [
               TextSpan(
-                  text: "₹${discountprice}",
+                  text: "₹$discountprice",
                   style: TextStyle(
                       decoration: TextDecoration.lineThrough,
                       color: Colors.grey.shade600,
-                      fontSize: 12)),
+                      fontSize: 12.sp)),
               TextSpan(
                   text:
-                      " ₹${double.parse(price) * (quantity == 0 ? 1 : currentNumber.value)}",
+                      " ₹${price! * (quantity == 0 ? 1 : currentNumber.value)}",
                   style: TextStyle(
                     color: Colors.grey.shade600,
-                    // fontSize: 12
+                    // fontSize: 12.sp
                   ))
             ])),
             SizedBox(height: 10),
@@ -314,7 +326,7 @@ class CalculateTheTotal extends HookWidget {
                             color: Colors.white,
                           ))),
                   SizedBox(width: 10),
-                  Text("${quantity}"),
+                  Text("$quantity"),
                   SizedBox(width: 10),
                   GestureDetector(
                       onTap: () async {
@@ -346,13 +358,35 @@ class CalculateTheTotal extends HookWidget {
         Spacer(),
         IconButton(
             onPressed: () async {
-              var response = await CartApi.removeCart(cartId);
-              if (response == true) {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/cart');
-              }
-              print(response);
-              print("delete");
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Please Confirm.'),
+                      content: Text('Are you sure to remove  the product.'),
+                      actions: [
+                        TextButton(
+                            onPressed: () async {
+                              var response = await CartApi.removeCart(cartId);
+                              if (response == true) {
+                                context
+                                    .read<CartNotifyProvider>()
+                                    .removeCount();
+                                Navigator.pop(context);
+                                // Navigator.pop(context);
+                                // Navigator.pushNamed(context, '/cart');
+                                print(response);
+                              }
+                            },
+                            child: Text('Yes')),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text('No')),
+                      ],
+                    );
+                  });
             },
             icon: Icon(Icons.delete_forever_outlined,
                 color: Color.fromARGB(255, 180, 51, 42))),
@@ -388,7 +422,7 @@ class SelectPayment extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
           child: Text('Payment Method',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
         ),
         GestureDetector(
           onTap: () async {
@@ -411,12 +445,12 @@ class SelectPayment extends StatelessWidget {
                 children: [
                   Text('Cash On Delivery',
                       style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
                           color: Colors.lightGreen)),
                   Text('pay cash when deliver items doorsteps',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 14.sp,
                       ))
                 ],
               )),
@@ -454,7 +488,8 @@ class AddressBody extends HookWidget {
           child: Row(
             children: [
               Text('Select Address For Delivery',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  style:
+                      TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
               SizedBox(width: 10),
               Spacer(),
               GestureDetector(

@@ -25,8 +25,8 @@ class RestuarantsViewMore extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: <Color>[
-                Color.fromRGBO(166, 206, 57, 1),
-                Color.fromRGBO(72, 170, 152, 1)
+                Color.fromRGBO(246, 219, 59, 1),
+                Color.fromARGB(255, 246, 227, 59),
               ]))),
           automaticallyImplyLeading: false,
           title: Image.asset("assets/icons/logo1.png"),
@@ -47,7 +47,7 @@ class RestuarantsViewMore extends StatelessWidget {
                       padding: const EdgeInsets.only(
                           left: 40, top: 5, bottom: 5, right: 30),
                       width: double.infinity,
-                      color: Color.fromRGBO(201, 228, 125, 1),
+                      color: Color.fromARGB(255, 252, 235, 82),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -69,55 +69,71 @@ class RestuarantsViewMore extends StatelessWidget {
               return ListView.builder(
                   itemCount: data.length,
                   itemBuilder: ((context, index) {
-                    Nrestaurants categoryProducts = data[index];
-                    return Container(
-                        margin:
-                            const EdgeInsets.only(top: 15, left: 20, right: 20),
-                        width: 300.w,
-                        height: 100.h,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                                color: Colors.grey.shade200, width: 2.w)),
-                        child: Row(
-                          // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ClipRRect(
+                    Nrestaurants products = data[index];
+                    print(products.id);
+                    return GestureDetector(
+                      onTap: () {
+                        if (products.status == true) {
+                          Navigator.pushNamed(context, '/restuarant-view-post',
+                              arguments: products.id.toString());
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                'This restaurant is currently unAvailable.'),
+                            duration: Duration(seconds: 1),
+                          ));
+                        }
+                      },
+                      child: Container(
+                          margin: const EdgeInsets.only(
+                              top: 15, left: 20, right: 20),
+                          width: 300.w,
+                          height: 100.h,
+                          decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
-                              child: CachedNetworkImage(
-                                fit: BoxFit.contain,
-                                width: 100,
-                                // height: 50,
-                                imageUrl:
-                                    "https://ebshosting.co.in${categoryProducts.logo}",
-                                errorWidget: (context, url, error) => Image.network(
-                                    "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png"),
-                              ),
-                            ),
-                            SizedBox(width: 20),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  width: 150,
-                                  child: Text(categoryProducts.name.toString(),
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600)),
+                              border: Border.all(
+                                  color: Colors.grey.shade200, width: 2.w)),
+                          child: Row(
+                            // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: CachedNetworkImage(
+                                  fit: BoxFit.contain,
+                                  width: 100,
+                                  // height: 50,
+                                  imageUrl:
+                                      "https://ebshosting.co.in${products.logo}",
+                                  errorWidget: (context, url, error) =>
+                                      Image.network(
+                                          "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png"),
                                 ),
-                                SizedBox(height: 5.h),
-                                // Text(categoryProducts..toString(),
-                                //     style: TextStyle(fontSize: 12)),
-                                SizedBox(height: 5.h),
-                                StarRating(
-                                  rating: categoryProducts.rating ?? 0,
-                                )
-                              ],
-                            ),
-                          ],
-                        ));
+                              ),
+                              SizedBox(width: 20),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: 150,
+                                    child: Text(products.name.toString(),
+                                        style: TextStyle(
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w600)),
+                                  ),
+                                  SizedBox(height: 5.h),
+                                  // Text(products..toString(),
+                                  //     style: TextStyle(fontSize: 12.sp)),
+                                  SizedBox(height: 5.h),
+                                  StarRating(
+                                    rating: products.rating ?? 0,
+                                  )
+                                ],
+                              ),
+                            ],
+                          )),
+                    );
                   }));
             } else if (snapshot.data == null) {
               return const Center(child: Text(" Not Available"));

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodle_mart/config/constants/route_path.dart';
+import 'package:foodle_mart/models/order_list_model.dart';
 import 'package:foodle_mart/views/authentication/auth_screen.dart';
 import 'package:foodle_mart/views/authentication/login.dart';
 import 'package:foodle_mart/views/authentication/otp_verify.dart';
@@ -8,6 +9,7 @@ import 'package:foodle_mart/views/cart/cart.dart';
 import 'package:foodle_mart/views/main_screen/main_screen.dart';
 import 'package:foodle_mart/views/new_you/near_you.dart';
 import 'package:foodle_mart/views/notification/notification.dart';
+import 'package:foodle_mart/views/orders/orders.dart';
 import 'package:foodle_mart/views/profile/address/add_new_address.dart';
 import 'package:foodle_mart/views/profile/address/your_address.dart';
 import 'package:foodle_mart/views/search/search_view.dart';
@@ -88,6 +90,10 @@ class Routes {
       case RoutePath.addNewAddress:
         {
           return _route(routeSettings, AddNewAddress());
+        }
+      case RoutePath.orders:
+        {
+          return _route(routeSettings, Orders());
         }
       default:
         {

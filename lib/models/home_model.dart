@@ -203,48 +203,100 @@ class RestproductModel {
       this.name,
       this.type,
       this.catId,
+      this.shopType,
+      this.shopId,
       this.hasUnits,
+      this.units,
       this.price,
       this.offerprice,
       this.image,
       this.restname,
-      this.status = false});
+      this.status});
 
   int? id;
   String? name;
   RestproductType? type;
   int? catId;
+  dynamic shopType;
+  dynamic shopId;
   String? hasUnits;
+  List<Unit>? units;
   int? price;
   int? offerprice;
   String? image;
   late String? restname;
-  bool status;
+  bool? status;
 
   factory RestproductModel.fromJson(Map<String, dynamic> json) =>
       RestproductModel(
           id: json["id"],
           name: json["name"],
+          shopType: json["shop_type"],
+          shopId: json["shop_id"],
           type: restproductTypeValues.map[json["type"]],
           catId: json["cat_id"],
           hasUnits: json["has_units"],
+          units: List<Unit>.from(json["units"].map((x) => Unit.fromJson(x))),
           price: json["price"],
           offerprice: json["offerprice"],
           image: json["image"],
           restname: json["restname"],
-          status: false);
+          status: json['status']);
 
   Map<String, dynamic> toJson() => {
         "id": id,
         "name": name,
+        "shop_type": shopType,
+        "shop_id": shopId,
         "type": restproductTypeValues.reverse![type],
         "cat_id": catId,
         "has_units": hasUnits,
+        "units": List<Unit>.from(units!.map((x) => x.toJson())),
         "price": price,
         "offerprice": offerprice,
         "image": image,
         "restname": restname,
         "status": status
+      };
+}
+
+class Unit {
+  Unit({
+    this.id,
+    this.productId,
+    this.name,
+    this.price,
+    this.offerprice,
+    this.dispOrder,
+    this.status,
+  });
+
+  int? id;
+  int? productId;
+  String? name;
+  int? price;
+  int? offerprice;
+  int? dispOrder;
+  String? status;
+
+  factory Unit.fromJson(Map<String, dynamic> json) => Unit(
+        id: json["id"],
+        productId: json["product_id"],
+        name: json["name"],
+        price: json["price"],
+        offerprice: json["offerprice"],
+        dispOrder: json["disp_order"],
+        status: json["status"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "product_id": productId,
+        "name": name,
+        "price": price,
+        "offerprice": offerprice,
+        "disp_order": dispOrder,
+        "status": status,
       };
 }
 

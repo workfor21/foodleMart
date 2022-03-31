@@ -57,7 +57,7 @@ class GetNewOtp extends HookWidget {
       children: [
         SizedBox(height: 170.h),
         Text("Verify",
-            style: TextStyle(fontSize: 25, color: Colors.grey.shade500)),
+            style: TextStyle(fontSize: 25.sp, color: Colors.grey.shade500)),
         SizedBox(height: 20.h),
         Container(
           width: 240.w,
@@ -109,8 +109,7 @@ class OtpButton extends HookWidget {
       width: double.infinity,
       height: 50,
       decoration: BoxDecoration(
-          color: Color.fromRGBO(246, 219, 59, 1),
-          borderRadius: BorderRadius.circular(10)),
+          color: Colors.lightGreen, borderRadius: BorderRadius.circular(10)),
       child: state.value
           ? TextButton(
               onPressed: () async {
@@ -120,6 +119,9 @@ class OtpButton extends HookWidget {
                 if (otp.text.isNotEmpty || checkOtp.isNotEmpty) {
                   if (otp.text == checkOtp) {
                     state.value = true;
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    Navigator.pop(context);
                     Navigator.pushNamed(context, '/mainScreen');
                   } else {
                     state.value = true;
@@ -133,7 +135,7 @@ class OtpButton extends HookWidget {
               child: Text("Continue",
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       letterSpacing: .5)))
           : FittedBox(

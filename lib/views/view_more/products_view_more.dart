@@ -24,8 +24,8 @@ class ProductsViewMore extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: <Color>[
-                Color.fromRGBO(166, 206, 57, 1),
-                Color.fromRGBO(72, 170, 152, 1)
+                Color.fromRGBO(246, 219, 59, 1),
+                Color.fromARGB(255, 246, 227, 59),
               ]))),
           automaticallyImplyLeading: false,
           title: Image.asset("assets/icons/logo1.png"),
@@ -46,7 +46,7 @@ class ProductsViewMore extends StatelessWidget {
                       padding: const EdgeInsets.only(
                           left: 40, top: 5, bottom: 5, right: 30),
                       width: double.infinity,
-                      color: Color.fromRGBO(201, 228, 125, 1),
+                      color: Color.fromARGB(255, 252, 235, 82),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -110,12 +110,12 @@ class ProductsViewMore extends StatelessWidget {
                                   width: 150,
                                   child: Text(categoryProducts.name.toString(),
                                       style: TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 16.sp,
                                           fontWeight: FontWeight.w600)),
                                 ),
                                 SizedBox(height: 5.h),
                                 Text(categoryProducts.status.toString(),
-                                    style: TextStyle(fontSize: 12)),
+                                    style: TextStyle(fontSize: 12.sp)),
                                 SizedBox(height: 5.h),
                                 // StarRating(
                                 //   rating: resturants.rating!.toDouble(),

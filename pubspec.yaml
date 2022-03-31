@@ -37,6 +37,9 @@ dependencies:
   flutter_screenutil: ^5.3.1
   flutter_typeahead: ^3.2.4
   flutter_web_browser: ^0.17.0
+  fluttertoast: ^8.0.9
+  geocoding: ^2.0.4
+  geolocator: ^8.2.0
   http: ^0.13.4
   provider: ^6.0.2
   razorpay_flutter: ^1.2.9

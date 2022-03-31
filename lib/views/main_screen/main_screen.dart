@@ -19,7 +19,7 @@ class MainScreen extends StatelessWidget {
       length: 4,
       child: Scaffold(
           bottomNavigationBar: menu(),
-          body: const TabBarView(children: [
+          body: TabBarView(children: [
             Home(),
             Category(),
             Orders(),
