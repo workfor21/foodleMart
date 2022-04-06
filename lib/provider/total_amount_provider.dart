@@ -19,7 +19,7 @@ class TotalAmount extends ChangeNotifier {
     var response =
         await http.post(Uri.parse(Api.cart.getcart), body: {"user_id": userId});
     var responseBody = json.decode(response.body);
-    // print(responseBody['cart']);
+    print(responseBody);
     for (var i in responseBody['cart']) {
       print(i['offerprice'] * i['quantity']);
       var amount = (i['offerprice'] as num) * (i['quantity'] as num);

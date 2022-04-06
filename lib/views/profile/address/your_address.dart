@@ -1,10 +1,15 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foodle_mart/config/constants/api_configurations.dart';
 import 'package:foodle_mart/models/address_model.dart';
+import 'package:foodle_mart/provider/address_provider.dart';
 import 'package:foodle_mart/repository/customer_repo.dart';
 import 'package:foodle_mart/views/profile/address/add_new_address.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class YourAddress extends StatefulWidget {
   static const routeName = '/your-address';
@@ -19,82 +24,80 @@ class _YourAddressState extends State<YourAddress> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-            elevation: 0,
-            flexibleSpace: Container(
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: <Color>[
-                  Color.fromRGBO(246, 219, 59, 1),
-                  Color.fromARGB(255, 246, 227, 59)
-                ]))),
-            // automaticallyImplyLeading: false,
-            leading: IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: Icon(Icons.arrow_back, color: Colors.black)),
-            title:
-                Text("Manage Address", style: TextStyle(color: Colors.black)),
-            bottom: PreferredSize(
-                child: Container(
-                  padding: const EdgeInsets.only(
-                      left: 40, top: 5, bottom: 5, right: 30),
-                  width: double.infinity,
-                  color: Color.fromARGB(255, 252, 235, 82),
-                  child: Text(
-                    "Manage Address",
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                ),
-                preferredSize: Size.fromHeight(40.h))),
+          elevation: 0,
+          flexibleSpace: Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: <Color>[
+                Color.fromRGBO(246, 219, 59, 1),
+                Color.fromARGB(255, 246, 227, 59),
+              ]))),
+          // automaticallyImplyLeading: false,
+          leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.arrow_back, color: Colors.black)),
+          title: Text("Manage Address",
+              style: TextStyle(color: Colors.black, fontSize: 16)),
+        ),
         body: AddressBody());
   }
 }
 
 class AddressBody extends HookWidget {
-  const AddressBody({Key? key}) : super(key: key);
+  AddressBody({Key? key}) : super(key: key);
+  List errorWidget = [
+    Image.asset('assets/images/add_address.png'),
+    CircularProgressIndicator()
+  ];
 
   @override
   Widget build(BuildContext context) {
     final state = useState(0);
+    final currentPage = useState(1);
     return Stack(clipBehavior: Clip.none, children: [
       SizedBox(
           height: MediaQuery.of(context).size.height * .78,
-          child: FutureBuilder(
-              future: AddressApi.addressList(),
-              builder: ((context, AsyncSnapshot snapshot) {
-                if (snapshot.hasData) {
-                  List<AddressListModel> data = snapshot.data;
-                  return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: data.length,
-                      itemBuilder: ((context, index) {
-                        AddressListModel addressList = data[index];
-                        return GestureDetector(
-                          onTap: () async {
-                            await AddressApi.defualtAddress(
-                                addressList.id.toString());
-                            state.value = index;
-                          },
-                          child: SelectableAddressWidget(
-                            defaultAddr: addressList.addressDefault,
-                            id: addressList.id.toString(),
-                            addresstype: addressList.type.toString(),
-                            address: addressList.address.toString(),
-                            phone: addressList.mobile.toString(),
-                            pincode: addressList.pincode.toString(),
-                          ),
-                        );
-                      }));
-                } else {
-                  return const Center(
-                      child: Text('No Address yet!!',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600)));
-                }
-              }))),
+          child: RefreshIndicator(
+            onRefresh: addressList,
+            child: FutureBuilder(
+                future: addressList(),
+                builder: ((context, AsyncSnapshot snapshot) {
+                  if (snapshot.hasData) {
+                    List<AddressListModel> data = snapshot.data;
+                    return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: data.length,
+                        itemBuilder: ((context, index) {
+                          AddressListModel addressList = data[index];
+                          return GestureDetector(
+                            onTap: () async {
+                              await AddressApi.defualtAddress(
+                                  addressList.id.toString());
+                              state.value = index;
+                            },
+                            child: SelectableAddressWidget(
+                              defaultAddr: addressList.addressDefault,
+                              id: addressList.id.toString(),
+                              addresstype: addressList.type.toString(),
+                              address: addressList.address.toString(),
+                              phone: addressList.mobile.toString(),
+                              pincode: addressList.pincode.toString(),
+                            ),
+                          );
+                        }));
+                  } else {
+                    Future.delayed(Duration(seconds: 5), () {
+                      currentPage.value = 0;
+                    });
+                    return Center(
+                        child: Center(child: errorWidget[currentPage.value]));
+                  }
+                })),
+          )),
       Positioned(
         right: 30,
         bottom: -10,
@@ -116,10 +119,34 @@ class AddressBody extends HookWidget {
                         Color.fromARGB(255, 246, 227, 59),
                       ]),
                   borderRadius: BorderRadius.circular(8)),
-              child: Center(child: Text("Add Address"))),
+              child: Center(
+                  child: Text(
+                "Add Address",
+                style: TextStyle(color: Colors.white),
+              ))),
         ),
       )
     ]);
+  }
+
+  Future<List<AddressListModel>?> addressList() async {
+    try {
+      var userId = await Preference.getPrefs("Id");
+      var response = await http
+          .post(Uri.parse(Api.address.getAddress), body: {"user_id": userId});
+      var responseBody = json.decode(response.body);
+
+      // print(responseBody['address']);
+      print("response : -");
+      List<AddressListModel> addressList = [];
+      for (var i in responseBody['address']) {
+        addressList.add(AddressListModel.fromJson(i));
+      }
+
+      return addressList;
+    } catch (e) {
+      return null;
+    }
   }
 }
 

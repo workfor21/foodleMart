@@ -106,8 +106,9 @@ class SignUp extends StatelessWidget {
                         style: TextStyle(color: Colors.grey.shade600)),
                     TextSpan(
                         text: "Login",
-                        style:
-                            TextStyle(color: Color.fromARGB(255, 246, 227, 59)),
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 246, 227, 59),
+                        ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Navigator.pushNamed(context, '/login');
@@ -129,7 +130,8 @@ class SignUp extends StatelessWidget {
                       TextSpan(
                           text: "Terms of Services ",
                           style: TextStyle(
-                              color: Color.fromARGB(255, 246, 227, 59)),
+                            color: Color.fromARGB(255, 246, 227, 59),
+                          ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () async {
                               print("redirect to url");
@@ -143,7 +145,8 @@ class SignUp extends StatelessWidget {
                       TextSpan(
                           text: " Privacy Policy ",
                           style: TextStyle(
-                              color: Color.fromARGB(255, 246, 227, 59)),
+                            color: Color.fromARGB(255, 246, 227, 59),
+                          ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () async {
                               print(" redirect to url");
@@ -157,7 +160,8 @@ class SignUp extends StatelessWidget {
                       TextSpan(
                           text: " Return Policy",
                           style: TextStyle(
-                              color: Color.fromARGB(255, 246, 227, 59)),
+                            color: Color.fromARGB(255, 246, 227, 59),
+                          ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () async {
                               print(" redirect to url");

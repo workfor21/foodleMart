@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:foodle_mart/provider/address_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,6 +10,7 @@ import 'package:foodle_mart/config/constants/api_configurations.dart';
 import 'package:foodle_mart/repository/customer_repo.dart';
 import 'package:foodle_mart/views/search/search.dart';
 import 'package:foodle_mart/widgets/form_field_widget.dart';
+import 'package:provider/provider.dart';
 
 class AddNewAddress extends StatefulWidget {
   static const routeName = '/add-new-address';
@@ -49,93 +51,76 @@ class _AddNewAddressState extends State<AddNewAddress> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-            elevation: 0,
-            flexibleSpace: Container(
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: <Color>[
-                  Color.fromRGBO(246, 219, 59, 1),
-                  Color.fromARGB(255, 246, 227, 59)
-                ]))),
-            // automaticallyImplyLeading: false,
-            actions: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                child: GestureDetector(
-                  onTap: () async {
-                    if (_nameController.text.isEmpty ||
-                        _mobileController.text.isEmpty ||
-                        _landmarkController.text.isEmpty ||
-                        _cityController.text.isEmpty ||
-                        _addressController.text.isEmpty ||
-                        _districtController.text.isEmpty ||
-                        _stateController.text.isEmpty ||
-                        _addresstypeController.text.isEmpty) {
+          elevation: 0,
+          flexibleSpace: Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: <Color>[
+                Color.fromRGBO(246, 219, 59, 1),
+                Color.fromARGB(255, 246, 227, 59),
+              ]))),
+          // automaticallyImplyLeading: false,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              child: TextButton(
+                onPressed: () async {
+                  if (_nameController.text.isEmpty ||
+                      _mobileController.text.isEmpty ||
+                      _landmarkController.text.isEmpty ||
+                      _cityController.text.isEmpty ||
+                      _addressController.text.isEmpty ||
+                      _districtController.text.isEmpty ||
+                      _stateController.text.isEmpty ||
+                      _addresstypeController.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text("Please fill the empty fields."),
+                        duration: Duration(seconds: 3)));
+                  } else {
+                    var response = await AddressApi.createAddress(
+                        _nameController.text,
+                        _phoneController.text,
+                        _mobileController.text,
+                        _landmarkController.text,
+                        _cityController.text,
+                        _addressController.text,
+                        _districtController.text,
+                        _stateController.text,
+                        _addresstypeController.text);
+                    if (response == true) {
+                      context.read<AddressApiProvider>().address();
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text("Please fill the empty fields."),
-                          duration: Duration(seconds: 3)));
+                        content: Text('Address Added Sucessfull'),
+                        duration: Duration(seconds: 2),
+                      ));
+                      Navigator.pop(context);
                     } else {
-                      var response = await AddressApi.createAddress(
-                          _nameController.text,
-                          _phoneController.text,
-                          _mobileController.text,
-                          _landmarkController.text,
-                          _cityController.text,
-                          _addressController.text,
-                          _districtController.text,
-                          _stateController.text,
-                          _addresstypeController.text);
-                      if (response == true) {
-                        Navigator.pop(context);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text("Check the information given."),
-                            duration: Duration(seconds: 1)));
-                      }
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text("Check the information given."),
+                          duration: Duration(seconds: 1)));
                     }
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.save, color: Colors.grey.shade800, size: 20),
-                      SizedBox(width: 10),
-                      Text("Save", style: TextStyle(color: Colors.black))
-                    ],
-                  ),
-                ),
-              )
-            ],
-            leading: IconButton(
-                onPressed: () {
-                  // Navigator.pushNamedAndRemoveUntil(
-                  //               context, '/mainScreen', (route) {
-                  //             print('rout name  ${route.settings.name}');
-                  //             return false;
-                  //           });
-                  Navigator.pop(context);
-                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  //   content: Text('Address Added Sucessfull'),
-                  //   duration: Duration(seconds: 2),
-                  // ));
-                  // Navigator.pushNamed(context, '/your-address');
+                  }
                 },
-                icon: Icon(Icons.arrow_back, color: Colors.black)),
-            title:
-                Text("Add New Address", style: TextStyle(color: Colors.black)),
-            bottom: PreferredSize(
-                child: Container(
-                  padding: const EdgeInsets.only(
-                      left: 40, top: 5, bottom: 5, right: 30),
-                  width: double.infinity,
-                  color: Color.fromARGB(255, 252, 235, 82),
-                  child: Text(
-                    "Add New Address",
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
+                child: Row(
+                  children: [
+                    Icon(Icons.save, color: Colors.grey.shade800, size: 20),
+                    SizedBox(width: 10),
+                    Text("Save", style: TextStyle(color: Colors.black))
+                  ],
                 ),
-                preferredSize: Size.fromHeight(40.h))),
+              ),
+            )
+          ],
+          leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.arrow_back, color: Colors.black)),
+          title: Text("Add New Address",
+              style: TextStyle(color: Colors.black, fontSize: 16)),
+        ),
         body: SingleChildScrollView(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),

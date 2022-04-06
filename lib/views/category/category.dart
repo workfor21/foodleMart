@@ -9,54 +9,71 @@ import 'package:foodle_mart/views/cart/cart.dart';
 import 'package:foodle_mart/views/notification/notification.dart';
 import 'package:foodle_mart/widgets/search_button.dart';
 
-class Category extends StatelessWidget {
+class Category extends StatefulWidget {
   static const routeName = '/category';
   const Category({Key? key}) : super(key: key);
 
   @override
+  State<Category> createState() => _CategoryState();
+}
+
+class _CategoryState extends State<Category> {
+  var currentPage = 1;
+  List errorWidget = [
+    Image.asset('assets/images/empty.png'),
+    CircularProgressIndicator()
+  ];
+
+  @override
+  void dispose() {
+    super.dispose();
+    currentPage;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          elevation: 0,
-          flexibleSpace: Container(
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: <Color>[
-                Color.fromRGBO(246, 219, 59, 1),
-                Color.fromARGB(255, 246, 227, 59)
-              ]))),
-          automaticallyImplyLeading: false,
-          title: Image.asset("assets/images/foodle_logo.png", width: 90),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  print('notification');
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => NotificationScreen()));
-                },
-                icon: Icon(Icons.notifications_none, color: Colors.black)),
-            IconButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/cart');
-                },
-                icon: Icon(Icons.local_grocery_store_outlined,
-                    color: Colors.black)),
-          ],
-          bottom: PreferredSize(
-              child: Column(
-                children: [
-                  SearchButton(),
-                  Container(
-                      padding:
-                          const EdgeInsets.only(left: 40, top: 5, bottom: 5),
-                      width: double.infinity,
-                      color: Color.fromARGB(255, 252, 235, 82),
-                      child: Text("all category"))
-                ],
-              ),
-              preferredSize: Size.fromHeight(80.h))),
+      // appBar: AppBar(
+      //     elevation: 0,
+      //     flexibleSpace: Container(
+      //         decoration: BoxDecoration(
+      //             gradient: LinearGradient(
+      //                 begin: Alignment.topLeft,
+      //                 end: Alignment.bottomRight,
+      //                 colors: <Color>[
+      //           Color.fromRGBO(166, 206, 57, 1),
+      //           Color.fromRGBO(72, 170, 152, 1)
+      //         ]))),
+      //     automaticallyImplyLeading: false,
+      //     title: Image.asset("assets/icons/logo1.png"),
+      //     actions: [
+      //       IconButton(
+      //           onPressed: () {
+      //             print('notification');
+      //             Navigator.push(context,
+      //                 MaterialPageRoute(builder: (_) => NotificationScreen()));
+      //           },
+      //           icon: Icon(Icons.notifications_none, color: Colors.black)),
+      //       IconButton(
+      //           onPressed: () {
+      //             Navigator.pushNamed(context, '/cart');
+      //           },
+      //           icon: Icon(Icons.local_grocery_store_outlined,
+      //               color: Colors.black)),
+      //     ],
+      //     bottom: PreferredSize(
+      //         child: Column(
+      //           children: [
+      //             SearchButton(),
+      //             Container(
+      //                 padding:
+      //                     const EdgeInsets.only(left: 40, top: 5, bottom: 5),
+      //                 width: double.infinity,
+      //                 color: Color.fromRGBO(201, 228, 125, 1),
+      //                 child: Text("all category"))
+      //           ],
+      //         ),
+      //         preferredSize: Size.fromHeight(80.h))),
       body: Padding(
           padding: const EdgeInsets.only(top: 20),
           child: FutureBuilder(
@@ -81,7 +98,12 @@ class Category extends StatelessWidget {
                                 'https://ebshosting.co.in/${categories.image}');
                       });
                 } else {
-                  return Center(child: CircularProgressIndicator());
+                  Future.delayed(Duration(seconds: 5), () {
+                    setState(() {
+                      currentPage = 0;
+                    });
+                  });
+                  return Center(child: Center(child: errorWidget[currentPage]));
                 }
               })),
     );
@@ -110,16 +132,24 @@ class Circlewidget extends StatelessWidget {
       child: Column(
         children: [
           Container(
+            padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
+              border: Border.all(width: 1, color: Colors.grey.shade300),
               borderRadius: BorderRadius.circular(100),
             ),
             clipBehavior: Clip.hardEdge,
-            child: CachedNetworkImage(
-              width: 50,
-              height: 50,
-              imageUrl: image,
-              errorWidget: (context, url, error) => Image.network(
-                  "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png"),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(100),
+              child: CachedNetworkImage(
+                width: 60,
+                height: 60,
+                imageUrl: image,
+                placeholder: (context, string) {
+                  return Image.asset('assets/images/empty.png');
+                },
+                errorWidget: (context, url, error) =>
+                    Image.asset('assets/images/empty.png'),
+              ),
             ),
           ),
           SizedBox(height: 4.h),

@@ -84,7 +84,7 @@ class _LoginState extends State<Login> {
                               .isEmpty
                           ? _emailController
                           : emailOrMobile,
-                      hintText: "Enter your mobile number"),
+                      hintText: "Enter email/ mobile"),
                   SizedBox(height: 20.h),
                   FormFieldWidget(
                       obscureText: true,
@@ -99,7 +99,8 @@ class _LoginState extends State<Login> {
                         TextSpan(
                             text: "reset password",
                             style: TextStyle(
-                                color: Color.fromARGB(255, 246, 227, 59)),
+                              color: Color.fromARGB(255, 246, 227, 59),
+                            ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 print('reset password');
@@ -128,7 +129,8 @@ class _LoginState extends State<Login> {
                       TextSpan(
                           text: "Terms of Services ",
                           style: TextStyle(
-                              color: Color.fromARGB(255, 246, 227, 59)),
+                            color: Color.fromARGB(255, 246, 227, 59),
+                          ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () async {
                               print("redirect to url");
@@ -142,7 +144,8 @@ class _LoginState extends State<Login> {
                       TextSpan(
                           text: " Privacy Policy ",
                           style: TextStyle(
-                              color: Color.fromARGB(255, 246, 227, 59)),
+                            color: Color.fromARGB(255, 246, 227, 59),
+                          ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () async {
                               print(" redirect to url");
@@ -156,7 +159,8 @@ class _LoginState extends State<Login> {
                       TextSpan(
                           text: " Return Policy",
                           style: TextStyle(
-                              color: Color.fromARGB(255, 246, 227, 59)),
+                            color: Color.fromARGB(255, 246, 227, 59),
+                          ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () async {
                               print(" redirect to url");
@@ -206,9 +210,12 @@ class LoginButton extends HookWidget {
                 if (emailormobile.text.isNotEmpty && password.text.isNotEmpty) {
                   if (response == true) {
                     state.value = true;
-                    Navigator.pop(context);
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => MainScreen()));
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                        '/mainScreen', (Route<dynamic> route) => false);
+                    // Navigator.pop(context);
+                    // Navigator.pop(context);
+                    // Navigator.push(context,
+                    //     MaterialPageRoute(builder: (_) => MainScreen()));
                   } else if (response == "Error") {
                     state.value = true;
                     Scaffold.of(context).showSnackBar(SnackBar(

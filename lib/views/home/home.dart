@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodle_mart/models/home_model.dart';
 import 'package:foodle_mart/models/res_model.dart';
 import 'package:foodle_mart/provider/cart_notify_provider.dart';
@@ -14,12 +15,15 @@ import 'package:foodle_mart/provider/pincode_provider.dart';
 import 'package:foodle_mart/provider/pincode_search_provider.dart';
 import 'package:foodle_mart/provider/total_amount_provider.dart';
 import 'package:foodle_mart/repository/customer_repo.dart';
+import 'package:foodle_mart/repository/hive_repo.dart';
 import 'package:foodle_mart/utils/getLocation.dart';
+import 'package:foodle_mart/utils/pop_up_message.dart';
 import 'package:foodle_mart/utils/star_rating.dart';
 import 'package:foodle_mart/views/notification/notification.dart';
 import 'package:foodle_mart/views/view_post/resturant_view_post.dart';
 import 'package:foodle_mart/widgets/header.dart';
 import 'package:foodle_mart/widgets/search_button.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
@@ -33,9 +37,28 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 //   State<Home> createState() => _HomeState();
 // }
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   static const routeName = '/home';
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   var currentBackPressTime;
+
+  var currentPage = 1;
+  List errorWidget = [
+    Image.asset('assets/images/empty.png'),
+    ShimmerErrorWidget()
+  ];
+
+  // @override
+  // void dispose() {
+  //   // TODO: implement dispose
+  //   super.dispose();
+  //   Hive.close();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -50,70 +73,72 @@ class Home extends StatelessWidget {
         return true;
       },
       child: Scaffold(
-        appBar: AppBar(
-            elevation: 0,
-            flexibleSpace: Container(
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: <Color>[
-                  Color.fromRGBO(246, 219, 59, 1),
-                  Color.fromARGB(255, 246, 227, 59)
-                ]))),
-            automaticallyImplyLeading: false,
-            title: Image.asset("assets/images/foodle_logo.png", width: 90),
-            actions: [
-              IconButton(
-                  onPressed: () {
-                    print('notification');
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => NotificationScreen()));
-                  }, //
-                  icon: Icon(Icons.notifications_none, color: Colors.black)),
-              IconButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/cart');
-                  },
-                  icon: Icon(Icons.local_grocery_store_outlined,
-                      color: Colors.black)),
-            ],
-            bottom: PreferredSize(
-                child: Column(
-                  children: [
-                    SearchButton(),
-                    // TypeAheadField(
-                    //   suggestionsCallback: suggestionsCallback,
-                    //   itemBuilder: itemBuilder,
-                    //   onSuggestionSelected: onSuggestionSelected),
-                    Container(
-                        height: 30,
-                        padding: const EdgeInsets.only(
-                          left: 40,
-                        ),
-                        width: double.infinity,
-                        color: Color.fromARGB(255, 252, 235, 82),
-                        child: const BottomLocationSelectionSheet())
-                  ],
-                ),
-                preferredSize: Size.fromHeight(80.h))),
+        // appBar: AppBar(
+        //     elevation: 0,
+        //     flexibleSpace: Container(
+        //         decoration: BoxDecoration(
+        //             gradient: LinearGradient(
+        //                 begin: Alignment.topLeft,
+        //                 end: Alignment.bottomRight,
+        //                 colors: <Color>[
+        //           Color.fromRGBO(166, 206, 57, 1),
+        //           Color.fromRGBO(72, 170, 152, 1)
+        //         ]))),
+        //     automaticallyImplyLeading: false,
+        //     title: Image.asset("assets/icons/logo1.png"),
+        //     actions: [
+        //       IconButton(
+        //           onPressed: () {
+        //             print('notification');
+        //             Navigator.push(
+        //                 context,
+        //                 MaterialPageRoute(
+        //                     builder: (_) => NotificationScreen()));
+        //           },
+        //           icon: Icon(Icons.notifications_none, color: Colors.black)),
+        //       IconButton(
+        //           onPressed: () {
+        //             Navigator.pushNamed(context, '/cart');
+        //           },
+        //           icon: Icon(Icons.local_grocery_store_outlined,
+        //               color: Colors.black)),
+        //     ],
+        //     bottom: PreferredSize(
+        //         child: Column(
+        //           children: [
+        //             SearchButton(),
+        //             // TypeAheadField(
+        //             //   suggestionsCallback: suggestionsCallback,
+        //             //   itemBuilder: itemBuilder,
+        //             //   onSuggestionSelected: onSuggestionSelected),
+        //             Container(
+        //                 height: 30,
+        //                 padding: const EdgeInsets.only(
+        //                   left: 40,
+        //                 ),
+        //                 width: double.infinity,
+        //                 color: Color.fromRGBO(201, 228, 125, 1),
+        //                 child: const BottomLocationSelectionSheet())
+        //           ],
+        //         ),
+        //         preferredSize: Size.fromHeight(80.h))),
         body: Stack(children: [
           SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ImageCarousel(),
-                SizedBox(height: 20.h),
+                SizedBox(height: 5.h),
                 Container(
-                    height: 80.h,
+                    height: 90.h,
                     child: FutureBuilder(
                         future: HomeApi.categories(),
                         builder: (context, AsyncSnapshot snapshot) {
                           if (snapshot.hasData) {
                             List<CategoryModel> data = snapshot.data;
                             return ListView.builder(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
                                 scrollDirection: Axis.horizontal,
                                 itemCount: data.length,
                                 itemBuilder: ((context, index) {
@@ -125,84 +150,153 @@ class Home extends StatelessWidget {
                                           "https://ebshosting.co.in${category.image}");
                                 }));
                           } else {
-                            return SizedBox(
-                              // width: double.infinity,
-                              height: 40,
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                scrollDirection: Axis.horizontal,
-                                itemCount: 7,
-                                itemBuilder: ((context, index) {
-                                  return Shimmer.fromColors(
-                                    baseColor: Colors.grey.shade300,
-                                    highlightColor: Colors.grey.shade100,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 10,
-                                          left: 18,
-                                          top: 12,
-                                          bottom: 12),
-                                      child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(100),
-                                          child: Image.asset(
-                                            "assets/images/carousal1.png",
-                                            fit: BoxFit.cover,
-                                            width: 50.w,
-                                          )),
+                            return ListView.builder(
+                              // shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: 7,
+                              itemBuilder: ((context, index) {
+                                return Shimmer.fromColors(
+                                  baseColor: Colors.grey.shade300,
+                                  highlightColor: Colors.grey.shade100,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 10),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          width: 1,
+                                          color: Colors.grey.shade300),
+                                      borderRadius: BorderRadius.circular(100),
                                     ),
-                                  );
-                                }),
-                              ),
+                                    child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                        child: Image.asset(
+                                          "assets/images/carousal1.png",
+                                          fit: BoxFit.cover,
+                                          width: 80.w,
+                                        )),
+                                  ),
+                                );
+                              }),
                             );
                           }
                         })),
                 SizedBox(height: 15.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/near-you',
-                            arguments: false);
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                              width: 2,
-                              color: Color.fromARGB(255, 246, 227, 59)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/near-you',
+                              arguments: false);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                  width: 2,
+                                  color: Color.fromRGBO(246, 219, 59, 1)),
+                              gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: <Color>[
+                                    Color.fromRGBO(246, 219, 59, 1),
+                                    Color.fromARGB(255, 246, 227, 59),
+                                  ])),
+                          clipBehavior: Clip.hardEdge,
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.asset(
+                                      "assets/images/carousal1.png",
+                                      width: 170.w,
+                                      height: 100.h,
+                                      fit: BoxFit.cover)),
+                              Positioned(
+                                left: -10,
+                                bottom: -10,
+                                child: Container(
+                                    padding: const EdgeInsets.only(
+                                        top: 5,
+                                        left: 30,
+                                        right: 20,
+                                        bottom: 15),
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: <Color>[
+                                              Color.fromRGBO(246, 219, 59, 1),
+                                              Color.fromARGB(255, 246, 227, 59),
+                                            ])),
+                                    child: Text("SuperMarkets",
+                                        style: TextStyle(
+                                            fontSize: 10.sp,
+                                            letterSpacing: .9,
+                                            color: Colors.white))),
+                              )
+                            ],
+                          ),
                         ),
-                        clipBehavior: Clip.hardEdge,
-                        child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.asset("assets/images/carousal1.png",
-                                width: 180.w,
-                                height: 100.h,
-                                fit: BoxFit.cover)),
                       ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/near-you',
-                            arguments: true);
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              width: 2,
-                              color: Color.fromARGB(255, 246, 227, 59)),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        clipBehavior: Clip.antiAliasWithSaveLayer,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.asset("assets/images/carousal1.png",
-                              width: 180.w, height: 100.h, fit: BoxFit.fill),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/near-you',
+                              arguments: true);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                width: 2,
+                                color: Color.fromRGBO(246, 219, 59, 1)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          clipBehavior: Clip.antiAliasWithSaveLayer,
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.asset(
+                                    "assets/images/carousal1.png",
+                                    width: 170.w,
+                                    height: 100.h,
+                                    fit: BoxFit.cover),
+                              ),
+                              Positioned(
+                                right: -10,
+                                bottom: -12,
+                                child: Container(
+                                    padding: const EdgeInsets.only(
+                                        top: 5,
+                                        left: 20,
+                                        right: 30,
+                                        bottom: 15),
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: <Color>[
+                                              Color.fromRGBO(246, 219, 59, 1),
+                                              Color.fromARGB(255, 246, 227, 59),
+                                            ])),
+                                    child: Text("Restaurants",
+                                        style: TextStyle(
+                                            fontSize: 10.sp,
+                                            letterSpacing: .9,
+                                            color: Colors.white))),
+                              )
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 SizedBox(height: 20),
                 Headerwidget(
@@ -218,6 +312,8 @@ class Home extends StatelessWidget {
                           if (snapshot.hasData) {
                             List<Nrestaurants> data = snapshot.data;
                             return ListView.builder(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
                                 scrollDirection: Axis.horizontal,
                                 shrinkWrap: true,
                                 itemCount: data.length,
@@ -234,23 +330,12 @@ class Home extends StatelessWidget {
                                           "https://ebshosting.co.in${restaurant.logo}");
                                 }));
                           } else {
-                            return SizedBox(
-                              height: 170,
-                              child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  shrinkWrap: true,
-                                  itemCount: 5,
-                                  itemBuilder: ((context, index) {
-                                    return Shimmer.fromColors(
-                                      baseColor: Colors.grey.shade300,
-                                      highlightColor: Colors.grey.shade100,
-                                      child: Cards(
-                                        route: '',
-                                        isRating: false,
-                                      ),
-                                    );
-                                  })),
-                            );
+                            // Future.delayed(Duration(seconds: 5), () {
+                            //   setState(() {
+                            //     currentPage = 0;
+                            //   });
+                            // });
+                            return Center(child: Center(child: errorWidget[1]));
                           }
                         })),
                 SizedBox(height: 20),
@@ -268,6 +353,8 @@ class Home extends StatelessWidget {
                             List<Nrestaurants> data = snapshot.data;
                             if (data.length == 0) {}
                             return ListView.builder(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
                                 scrollDirection: Axis.horizontal,
                                 shrinkWrap: true,
                                 itemCount: data.length,
@@ -283,23 +370,12 @@ class Home extends StatelessWidget {
                                           "https://ebshosting.co.in/${supermarket.logo}");
                                 }));
                           } else {
-                            return SizedBox(
-                              height: 170,
-                              child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  shrinkWrap: true,
-                                  itemCount: 5,
-                                  itemBuilder: ((context, index) {
-                                    return Shimmer.fromColors(
-                                      baseColor: Colors.grey.shade300,
-                                      highlightColor: Colors.grey.shade100,
-                                      child: Cards(
-                                        route: '',
-                                        isRating: false,
-                                      ),
-                                    );
-                                  })),
-                            );
+                            // Future.delayed(Duration(seconds: 5), () {
+                            //   setState(() {
+                            //     currentPage = 0;
+                            //   });
+                            // });
+                            return Center(child: Center(child: errorWidget[1]));
                           }
                         })),
                 SizedBox(height: 20),
@@ -320,6 +396,8 @@ class Home extends StatelessWidget {
                           if (snapshot.hasData) {
                             List<RestproductModel> data = snapshot.data;
                             return ListView.builder(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
                                 scrollDirection: Axis.horizontal,
                                 shrinkWrap: true,
                                 itemCount: data.length,
@@ -328,6 +406,7 @@ class Home extends StatelessWidget {
                                   print('products units ::::: ' +
                                       products.units.toString());
                                   return AddToCartHomeButton(
+                                    offerprice: products.offerprice.toString(),
                                     status: products.status,
                                     title: products.name,
                                     price: products.offerprice.toString(),
@@ -341,23 +420,12 @@ class Home extends StatelessWidget {
                                   );
                                 }));
                           } else {
-                            return SizedBox(
-                              height: 170,
-                              child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  shrinkWrap: true,
-                                  itemCount: 5,
-                                  itemBuilder: ((context, index) {
-                                    return Shimmer.fromColors(
-                                      baseColor: Colors.grey.shade300,
-                                      highlightColor: Colors.grey.shade100,
-                                      child: Cards(
-                                        route: '',
-                                        isRating: false,
-                                      ),
-                                    );
-                                  })),
-                            );
+                            // Future.delayed(Duration(seconds: 5), () {
+                            //   setState(() {
+                            //     currentPage = 0;
+                            //   });
+                            // });
+                            return Center(child: Center(child: errorWidget[1]));
                           }
                         })),
                 SizedBox(height: 20),
@@ -369,12 +437,15 @@ class Home extends StatelessWidget {
           ),
           Positioned(
               height: 50,
-              bottom: 0,
+              bottom: 2,
+              left: 4,
+              right: 4,
               child: context.watch<CartNotifyProvider>().isCart == true
                   ? Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       width: MediaQuery.of(context).size.width,
                       decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
                         gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -418,10 +489,37 @@ class Home extends StatelessWidget {
   }
 }
 
+class ShimmerErrorWidget extends StatelessWidget {
+  const ShimmerErrorWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 170,
+      child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          shrinkWrap: true,
+          itemCount: 5,
+          itemBuilder: ((context, index) {
+            return Shimmer.fromColors(
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.grey.shade100,
+              child: Cards(
+                route: '',
+                isRating: false,
+              ),
+            );
+          })),
+    );
+  }
+}
+
 class AddToCartHomeButton extends HookWidget {
   bool? status;
   String? title;
+  String? unitname;
   String? price;
+  String? offerprice;
   String? image;
   double ratings;
   bool isRating;
@@ -436,7 +534,9 @@ class AddToCartHomeButton extends HookWidget {
       this.status,
       this.isRating = true,
       this.ratings = 0,
+      this.unitname,
       this.price,
+      this.offerprice,
       this.title,
       this.hasUnit,
       this.type,
@@ -468,9 +568,8 @@ class AddToCartHomeButton extends HookWidget {
             ),
             child: CachedNetworkImage(
               imageUrl: "https://ebshosting.co.in$image",
-              errorWidget: (context, url, error) => Image.network(
-                  "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png",
-                  height: 110.h),
+              errorWidget: (context, url, error) =>
+                  Image.asset('assets/images/empty.png', height: 110.h),
             ),
             // Image.network(
             //   image,
@@ -559,6 +658,10 @@ class AddToCartHomeButton extends HookWidget {
                                                             unit![index];
                                                         print(unitList.id);
                                                         return SubProductsViewPost(
+                                                          productname: title,
+                                                          offerprice: unitList
+                                                              .offerprice
+                                                              .toString(),
                                                           unitId: unitList.id
                                                               .toString(),
                                                           type: type,
@@ -577,21 +680,18 @@ class AddToCartHomeButton extends HookWidget {
                                                 );
                                               }));
                                 } else {
-                                  showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        Future.delayed(Duration(seconds: 2),
-                                            () {
-                                          Navigator.pop(context);
-                                        });
-                                        return AlertDialog(
-                                          title: Text(
-                                              'Product is being added to cart',
-                                              style:
-                                                  TextStyle(fontSize: 12.sp)),
-                                        );
-                                      });
-                                  currentButton.value = true;
+                                  // currentButton.value = true;
+                                  await HiveCartRepo.addToCart(
+                                    shopId.toString(),
+                                    productId.toString(),
+                                    0.toString(),
+                                    type,
+                                    1.toString(),
+                                    title,
+                                    0.toString(),
+                                    price,
+                                    offerprice,
+                                  );
                                   var response = await CartApi.addToCart(
                                       type, productId, shopId, 0);
                                   if (response == true) {
@@ -599,14 +699,10 @@ class AddToCartHomeButton extends HookWidget {
                                         .read<CartNotifyProvider>()
                                         .addCount();
                                     context.read<TotalAmount>().GetAllAmounts();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                            content:
-                                                Text("product added to cart"),
-                                            duration: Duration(seconds: 1)));
+                                    flutterToast('product added to cart');
+                                    // print('add to cart:::::::' +
+                                    //     response.toString());
                                   }
-                                  print('add to cart:::::::' +
-                                      response.toString());
 
                                   print('add to cart');
                                 }
@@ -780,8 +876,8 @@ class ImageCarousel extends HookWidget {
                         width: MediaQuery.of(context).size.width * 1,
                         imageUrl:
                             "https://ebshosting.co.in/${banners.image.toString()}",
-                        errorWidget: (context, url, error) => Image.network(
-                            "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png"),
+                        errorWidget: (context, url, error) =>
+                            Image.asset("assets/images/foodle_logo.png"),
                       );
 
                       // Image.network(
@@ -809,7 +905,7 @@ class ImageCarousel extends HookWidget {
                                 dotHeight: 5.h,
                                 dotColor: Colors.grey.shade300,
                                 activeDotColor:
-                                    Color.fromRGBO(201, 228, 125, 1),
+                                    Color.fromARGB(255, 255, 226, 58),
                                 strokeWidth: 1)))
               ],
             );
@@ -847,19 +943,27 @@ class CircleWidget extends StatelessWidget {
         Navigator.pushNamed(context, '/viewall', arguments: id);
       },
       child: Padding(
-        padding: const EdgeInsets.only(right: 10, left: 18),
+        padding: const EdgeInsets.only(right: 5, left: 5),
         child: Column(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(100),
-              child: CachedNetworkImage(
-                width: 50,
-                height: 50,
-                imageUrl: image,
-                placeholder: (context, url) => Image.network(
-                    "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png"),
-                errorWidget: (context, url, error) => Image.network(
-                    "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png"),
+            Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                border: Border.all(width: 1, color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(100),
+                child: CachedNetworkImage(
+                  width: 65.w,
+                  height: 65.h,
+                  imageUrl: image,
+                  placeholder: (context, url) => Image.network(
+                      "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png",
+                      fit: BoxFit.cover),
+                  errorWidget: (context, url, error) =>
+                      Image.asset('assets/images/empty.png'),
+                ),
               ),
             ),
             SizedBox(height: 4.h),
@@ -931,8 +1035,8 @@ class Cards extends StatelessWidget {
               ),
               child: CachedNetworkImage(
                 imageUrl: image,
-                errorWidget: (context, url, error) => Image.network(
-                    "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png"),
+                errorWidget: (context, url, error) =>
+                    Image.asset('assets/images/empty.png'),
               ),
               // Image.network(
               //   image,
@@ -952,7 +1056,7 @@ class Cards extends StatelessWidget {
                       width: 110,
                       child: Text(title,
                           style: TextStyle(
-                              fontSize: 12.sp, fontWeight: FontWeight.w600)),
+                              fontSize: 11.sp, fontWeight: FontWeight.w600)),
                     ),
                   ],
                 ),
@@ -1005,93 +1109,102 @@ class _BottomLocationSelectionSheetState
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text("Delivery to :", style: TextStyle(color: Colors.grey.shade600)),
-        TextButton(
-          child: Text("${context.watch<pincodeProvider>().pincode}",
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
-          onPressed: () {
-            showModalBottomSheet(
-                isDismissible: true,
-                isScrollControlled: true,
-                context: context,
-                builder: (context) => DraggableScrollableSheet(
-                    expand: false,
-                    initialChildSize: .3,
-                    minChildSize: 0.3,
-                    maxChildSize: 0.3,
-                    builder: (BuildContext context,
-                        ScrollController scrollController) {
-                      return SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Column(
-                            children: [
-                              SizedBox(height: 20),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("Where do you want the delivery",
-                                      style: TextStyle(
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.w600)),
-                                ],
-                              ),
-                              SizedBox(height: 7),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                      "Select the pincode to see product availability",
-                                      style: TextStyle(
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.w300)),
-                                ],
-                              ),
-                              SizedBox(height: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SelectLocationButton(
-                                    title: "Add Address",
-                                    icon: Icons.location_on_outlined,
-                                    function: () {
-                                      print('add address');
-                                      Navigator.pushNamed(
-                                          context, '/add-new-address');
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  SelectLocationButton(
-                                    title: "Enter Pincode",
-                                    icon: Icons.location_on_outlined,
-                                    function: () {
-                                      Navigator.pop(context);
-                                      show(context);
-                                      print('enter pincode');
-                                    },
-                                  ),
-                                  SelectLocationButton(
-                                    title: "Detect Location",
-                                    icon: Icons.my_location_sharp,
-                                    function: () {
-                                      GetLocation.getCurrentLocation(context);
-                                      print('location detection');
-                                    },
-                                  ),
-                                ],
-                              )
-                            ],
+        Text("Delivery to :",
+            style: TextStyle(color: Colors.black, fontSize: 12)),
+        Container(
+          margin: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                  width: 1, color: Color.fromARGB(255, 255, 236, 131))),
+          width: 230.w,
+          child: TextButton(
+            child: Text("${context.watch<pincodeProvider>().pincode}",
+                style: TextStyle(color: Colors.black, fontSize: 12)),
+            onPressed: () {
+              showModalBottomSheet(
+                  isDismissible: true,
+                  isScrollControlled: true,
+                  context: context,
+                  builder: (context) => DraggableScrollableSheet(
+                      expand: false,
+                      initialChildSize: .3,
+                      minChildSize: 0.3,
+                      maxChildSize: 0.3,
+                      builder: (BuildContext context,
+                          ScrollController scrollController) {
+                        return SingleChildScrollView(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              children: [
+                                SizedBox(height: 20),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("Where do you want the delivery",
+                                        style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w600)),
+                                  ],
+                                ),
+                                SizedBox(height: 7),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                        "Select the pincode to see product availability",
+                                        style: TextStyle(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w300)),
+                                  ],
+                                ),
+                                SizedBox(height: 20),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SelectLocationButton(
+                                      title: "Add Address",
+                                      icon: Icons.location_on_outlined,
+                                      function: () {
+                                        print('add address');
+                                        Navigator.pushNamed(
+                                            context, '/add-new-address');
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    SelectLocationButton(
+                                      title: "Enter Pincode",
+                                      icon: Icons.location_on_outlined,
+                                      function: () {
+                                        Navigator.pop(context);
+                                        show(context);
+                                        print('enter pincode');
+                                      },
+                                    ),
+                                    SelectLocationButton(
+                                      title: "Detect Location",
+                                      icon: Icons.my_location_sharp,
+                                      function: () {
+                                        GetLocation.getCurrentLocation(context);
+                                        print('location detection');
+                                      },
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    }));
-          },
+                        );
+                      }));
+            },
+          ),
         )
       ],
     );

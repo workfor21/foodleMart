@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:foodle_mart/config/constants/api_configurations.dart';
 import 'package:foodle_mart/models/address_model.dart';
 import 'package:foodle_mart/models/cart_modal.dart';
+import 'package:foodle_mart/models/hive_cart_model.dart';
 import 'package:foodle_mart/models/home_model.dart';
 import 'package:foodle_mart/models/order_list_model.dart';
 import 'package:foodle_mart/models/pincode_model.dart';
@@ -12,6 +13,8 @@ import 'package:foodle_mart/models/restaurant_category_modal.dart';
 import 'package:foodle_mart/models/search_state_model.dart';
 import 'package:foodle_mart/models/supermarket_model.dart';
 import 'package:foodle_mart/models/user_model.dart';
+import 'package:foodle_mart/repository/hive_repo.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -140,7 +143,7 @@ class HomeApi {
 
       return productsList;
     } catch (e) {
-      return [];
+      return null;
     }
   }
 
@@ -193,7 +196,7 @@ class HomeApi {
 
       return supermarketList;
     } catch (e) {
-      return [];
+      return null;
     }
   }
 
@@ -501,6 +504,7 @@ class CartApi {
 
     final userId = await Preference.getPrefs("Id");
 
+    //Api call
     var response = await http.post(Uri.parse(Api.cart.addtocart), body: {
       "type": type.toString(),
       "product_id": productId.toString(),
@@ -516,7 +520,6 @@ class CartApi {
     }
 
     var responseBody = json.decode(response.body);
-    print('cart added model' + responseBody.toString());
 
     if (responseBody['sts'] == '01') {
       return true;
@@ -532,6 +535,10 @@ class CartApi {
     var presentCartBody = json.encode(presentCart.body);
     // print('cartModel' + presentCartBody.toString());
     await Preference.addPrefs('cart', presentCartBody);
+    Box<HiveCart> hive = Hive.box('cart');
+    print('hivecart api ::: ' + hive.toString());
+    print('hive working');
+
     print("sharedPreferences ::::::: ${await Preference.getPrefs('cart')}");
   }
 
@@ -540,14 +547,6 @@ class CartApi {
     final userId = await Preference.getPrefs("Id");
     var response =
         await http.post(Uri.parse(Api.cart.getcart), body: {"user_id": userId});
-    // var responseBody = json.decode(response.body);
-    // print('cart api');
-    // print(responseBody['cart']);
-
-    // List<CartListModal> cartList = [];
-    // for (var i in responseBody['cart']) {
-    //   cartList.add(CartListModal.fromJson(i));
-    // }
 
     print('cart respons :::: ${response.body}');
     Map<String, dynamic> data = json.decode(response.body);
@@ -563,7 +562,6 @@ class CartApi {
           await http.post(Uri.parse(Api.cart.remove), body: {"cartid": cartId});
       await CartApi.updateCartinSharedPreferences();
       var responseBody = json.decode(response.body);
-      print(responseBody);
       if (responseBody['sts'] == "00") {
         return true;
       } else {
@@ -581,7 +579,6 @@ class CartApi {
         body: {"cartid": cartId, "quantity": quantity});
     print('working0');
     var responseBody = json.decode(response.body);
-    print(responseBody);
     if (responseBody['sts'] == "01") {
       return true;
     } else {
@@ -629,6 +626,11 @@ class OrderApi {
       "paytype": paytype.toString(),
     });
     var responseBody = json.decode(response.body);
+    if (responseBody['sts'] == "01") {
+      return true;
+    } else {
+      return false;
+    }
     print(responseBody);
   }
 }

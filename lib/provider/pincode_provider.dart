@@ -2,17 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class pincodeProvider extends ChangeNotifier {
-  String _pincode = '';
-  String _display = 'location';
+  String _pincode = 'add location';
+  String _display = 'add location';
 
   String get pincode => _display;
 
   void isDisplayPin() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.getString('display_pin').toString().isEmpty
+    prefs.getString('display_pin')!.isEmpty
         ? _display = 'location'
         : _display = prefs.getString('display_pin').toString();
-    if (prefs.getString('display_pin')!.isEmpty ||
+    if (prefs.getString('display_pin')!.isEmpty &&
         prefs.getString('pincode')!.isEmpty) {
       // print('both empty');
       // print('display_pin'+ prefs.getString('display_pin').toString())

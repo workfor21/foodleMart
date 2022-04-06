@@ -14,7 +14,7 @@ class NamedButton extends StatelessWidget {
         width: double.infinity,
         height: 50,
         decoration: BoxDecoration(
-            color: Color.fromARGB(255, 246, 227, 59),
+            color: Color.fromRGBO(246, 219, 59, 1),
             borderRadius: BorderRadius.circular(10)),
         child: TextButton(
             onPressed: () => function!(),

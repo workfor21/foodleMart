@@ -28,7 +28,7 @@ class SupermarketsViewMore extends StatelessWidget {
                 Color.fromARGB(255, 246, 227, 59),
               ]))),
           automaticallyImplyLeading: false,
-          title: Image.asset("assets/icons/logo1.png"),
+          title: Image.asset("assets/images/foodle_logo.png", width: 70.w),
           bottom: PreferredSize(
               child: Column(
                 children: [
@@ -46,7 +46,7 @@ class SupermarketsViewMore extends StatelessWidget {
                       padding: const EdgeInsets.only(
                           left: 40, top: 5, bottom: 5, right: 30),
                       width: double.infinity,
-                      color: Color.fromARGB(255, 252, 235, 82),
+                      color: Color.fromARGB(255, 255, 226, 58),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -71,8 +71,16 @@ class SupermarketsViewMore extends StatelessWidget {
                     Nrestaurants products = data[index];
                     return GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/supermarket-view-post',
-                            arguments: products.id.toString());
+                        if (products.status == true) {
+                          Navigator.pushNamed(context, '/supermarket-view-post',
+                              arguments: products.id.toString());
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                'This supermarket is currently unAvailable.'),
+                            duration: Duration(seconds: 1),
+                          ));
+                        }
                       },
                       child: Container(
                           margin: const EdgeInsets.only(
@@ -96,8 +104,8 @@ class SupermarketsViewMore extends StatelessWidget {
                                   imageUrl:
                                       "https://ebshosting.co.in${products.logo}",
                                   errorWidget: (context, url, error) =>
-                                      Image.network(
-                                          "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png"),
+                                      Image.asset('assets/images/empty.png',
+                                          fit: BoxFit.cover, width: 100.h),
                                 ),
                               ),
                               SizedBox(width: 20),
@@ -113,8 +121,15 @@ class SupermarketsViewMore extends StatelessWidget {
                                             fontWeight: FontWeight.w600)),
                                   ),
                                   SizedBox(height: 5.h),
-                                  Text(products.status.toString(),
-                                      style: TextStyle(fontSize: 12.sp)),
+                                  Text(
+                                      products.status == true
+                                          ? 'Available'
+                                          : 'NotAvaiable',
+                                      style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: products.status == true
+                                              ? Colors.green
+                                              : Colors.red)),
                                   SizedBox(height: 5.h),
                                   // StarRating(
                                   //   rating: resturants.rating!.toDouble(),

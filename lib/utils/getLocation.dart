@@ -34,7 +34,8 @@ class GetLocation {
           await placemarkFromCoordinates(position.latitude, position.longitude);
       Placemark place = placemarks[0];
       var pincode = '${place.postalCode}';
-      var location = '${place.street} ${place.postalCode}';
+      var location =
+          '${place.administrativeArea} ${place.subAdministrativeArea} ${place.locality} ${place.street} ${place.postalCode}';
       print(location);
       prefs.setString('display_pin', pincode);
       prefs.setString('location', location);

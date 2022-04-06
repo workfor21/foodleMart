@@ -45,8 +45,16 @@ class Phone extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(color: Colors.grey.shade600),
                         ),
-                        prefixIcon: Image.asset('assets/icons/indiaflag.png',
-                            width: 40.w, height: 40.h),
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 14),
+                          child: Image.asset(
+                            'assets/icons/indiaflag.png',
+                            width: 8,
+                            height: 8,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide:
@@ -102,7 +110,8 @@ class Phone extends StatelessWidget {
                         TextSpan(
                             text: "Terms of Services ",
                             style: TextStyle(
-                                color: Color.fromARGB(255, 246, 227, 59)),
+                              color: Color.fromARGB(255, 246, 227, 59),
+                            ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () async {
                                 print("redirect to url");
@@ -116,7 +125,8 @@ class Phone extends StatelessWidget {
                         TextSpan(
                             text: " Privacy Policy ",
                             style: TextStyle(
-                                color: Color.fromARGB(255, 246, 227, 59)),
+                              color: Color.fromARGB(255, 246, 227, 59),
+                            ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () async {
                                 print(" redirect to url");
@@ -166,7 +176,7 @@ class PhoneButton extends HookWidget {
       width: double.infinity,
       height: 50,
       decoration: BoxDecoration(
-          color: Color.fromARGB(255, 246, 227, 59),
+          color: Color.fromRGBO(246, 219, 59, 1),
           borderRadius: BorderRadius.circular(10)),
       child: state.value
           ? TextButton(
@@ -178,9 +188,9 @@ class PhoneButton extends HookWidget {
                 if (response && phoneNumber.text.length == 10) {
                   state.value = true;
                   context.read<PhoneProvider>().getNumber(phoneNumber.text);
-                  Navigator.pop(context);
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => Login()));
+                  // Navigator.pushReplacementNamed(context, '/login');
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/login', (route) => true);
                 } else if (phoneNumber.text.isEmpty) {
                   state.value = true;
                   Scaffold.of(context).showSnackBar(

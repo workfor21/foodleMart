@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodle_mart/models/home_model.dart';
 import 'package:foodle_mart/models/res_model.dart';
 import 'package:foodle_mart/models/restaurant_category_modal.dart';
@@ -17,27 +18,27 @@ class SearchView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Icon(
-            Icons.arrow_back,
-            color: Colors.black,
+          leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Icon(
+              Icons.arrow_back,
+              color: Colors.black,
+            ),
           ),
-        ),
-        elevation: 0,
-        flexibleSpace: Container(
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: <Color>[
-              Color.fromRGBO(166, 206, 57, 1),
-              Color.fromRGBO(72, 170, 152, 1)
-            ]))),
-        title: Image.asset("assets/icons/logo1.png"),
-      ),
+          elevation: 0,
+          flexibleSpace: Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: <Color>[
+                Color.fromRGBO(246, 219, 59, 1),
+                Color.fromARGB(255, 246, 227, 59),
+              ]))),
+          title: Text('Search',
+              style: TextStyle(fontSize: 16, color: Colors.black))),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -45,19 +46,25 @@ class SearchView extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
+                  horizontal: 10.0,
                 ),
-                height: 50,
+                height: 40,
                 child: SizedBox(
                   child: TextField(
                     decoration: InputDecoration(
-                      fillColor: Colors.grey.shade200,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                        Radius.circular(10),
-                      )),
-                      hintText: 'Enter a search term',
-                    ),
+                        fillColor: Colors.grey.shade200,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        )),
+                        hintStyle: TextStyle(fontSize: 12),
+                        hintText: 'Search for food, restaurants, supermarkets',
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: SvgPicture.asset(
+                            'assets/icons/search.svg',
+                          ),
+                        )),
                     onChanged: (value) {
                       context.read<SearchAllProvider>().getQuery(value);
                       // print(value);
@@ -67,7 +74,7 @@ class SearchView extends StatelessWidget {
               ),
               SizedBox(height: 20),
               Container(
-                  height: 80.h,
+                  height: 90.h,
                   child: FutureBuilder(
                       future: HomeApi.categories(),
                       builder: (context, AsyncSnapshot snapshot) {
@@ -119,7 +126,7 @@ class SearchView extends StatelessWidget {
                       })),
               Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
+                  horizontal: 10.0,
                 ),
                 child: FutureBuilder(
                     future: context.watch<SearchAllProvider>().SearchResults(),
@@ -172,8 +179,8 @@ class SearchView extends StatelessWidget {
                                                 : "https://ebshosting.co.in${products['image']}",
                                             errorWidget: (context, url,
                                                     error) =>
-                                                Image.network(
-                                                    "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png",
+                                                Image.asset(
+                                                    'assets/images/empty.png',
                                                     width: 100.h,
                                                     fit: BoxFit.cover),
                                           ),

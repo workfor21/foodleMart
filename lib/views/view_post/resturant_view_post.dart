@@ -2,22 +2,20 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:foodle_mart/config/constants/api_configurations.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:foodle_mart/models/cart_modal.dart';
+import 'package:foodle_mart/models/hive_cart_model.dart';
 import 'package:foodle_mart/models/post_model.dart';
-import 'package:foodle_mart/models/restaurant_category_modal.dart';
 import 'package:foodle_mart/provider/cart_notify_provider.dart';
-import 'package:foodle_mart/provider/product_map_provider.dart';
 import 'package:foodle_mart/provider/total_amount_provider.dart';
 import 'package:foodle_mart/repository/customer_repo.dart';
+import 'package:foodle_mart/repository/hive_repo.dart';
+import 'package:foodle_mart/utils/pop_up_message.dart';
 import 'package:foodle_mart/utils/star_rating.dart';
-import 'package:foodle_mart/views/cart/cart.dart';
-import 'package:foodle_mart/views/home/home.dart';
-import 'package:http/http.dart' as http;
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
@@ -52,17 +50,18 @@ class _ViewPostState extends State<RestuarantViewPost>
               Navigator.pushNamed(context, '/cart');
             },
             child: Container(
-              width: 30.w,
-              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              decoration: BoxDecoration(
-                image: const DecorationImage(
-                  image: const AssetImage(
-                    "assets/icons/cart.png",
-                  ),
-                ),
-                borderRadius: BorderRadius.circular(8),
-                color: const Color.fromARGB(171, 255, 255, 255),
+              width: 28.w,
+              height: 15.h,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 3,
               ),
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                // color: Colors.blue
+                color: Colors.white70,
+              ),
+              child: SvgPicture.asset('assets/icons/cart.svg'),
             ),
           )
         ],
@@ -115,8 +114,8 @@ class _ViewPostState extends State<RestuarantViewPost>
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                     colors: <Color>[
-                                  Color.fromARGB(255, 253, 215, 0),
-                                  Color.fromARGB(255, 246, 227, 59),
+                                  Color.fromARGB(255, 243, 221, 96),
+                                  Color.fromARGB(255, 218, 201, 51),
                                 ])),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -148,25 +147,28 @@ class _ViewPostState extends State<RestuarantViewPost>
                       length: categoryLength,
                       child: Column(children: [
                         Container(
+                          clipBehavior: Clip.hardEdge,
                           margin: const EdgeInsets.only(
                               top: 20, left: 20, right: 20),
-                          // height: 40,
+                          height: 40,
                           decoration: BoxDecoration(
                               color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(50),
+                              borderRadius: BorderRadius.circular(20),
                               border: Border.all(
                                   color: Colors.grey.shade400, width: 0)),
                           child: TabBar(
                             indicator: BoxDecoration(
                                 color: Colors.grey.shade400,
-                                borderRadius: BorderRadius.circular(50),
+                                borderRadius: BorderRadius.circular(20),
                                 border:
                                     Border.all(color: Colors.grey.shade400)),
                             isScrollable: true,
                             labelColor: Colors.black,
                             unselectedLabelColor: Colors.black,
                             tabs: data.category.values.map((e) {
-                              return Tab(text: e);
+                              return Tab(
+                                child: Text(e, style: TextStyle(fontSize: 12)),
+                              );
                             }).toList(),
                           ),
                         ),
@@ -187,6 +189,9 @@ class _ViewPostState extends State<RestuarantViewPost>
                                         e.catId.toString()) {
                                       print('hasUnit::::::' + e.hasUnits);
                                       return ViewPostsWidget(
+                                        offerprice:
+                                            productList.offerprice.toString(),
+                                        productname: productList.name,
                                         unitId: 0,
                                         unit: e.units,
                                         hasUnit: e.hasUnits,
@@ -245,7 +250,9 @@ class ViewPostsWidget extends HookWidget {
   dynamic productId;
   int? itemCount;
   String? image;
+  String productname;
   String name;
+  String offerprice;
   String price;
   String status;
   ViewPostsWidget(
@@ -259,7 +266,9 @@ class ViewPostsWidget extends HookWidget {
       this.productId,
       this.itemCount,
       this.image,
+      required this.offerprice,
       required this.price,
+      required this.productname,
       required this.name,
       required this.status})
       : super(key: key);
@@ -294,8 +303,8 @@ class ViewPostsWidget extends HookWidget {
                             height: 100.h,
                             width: 100.w,
                             imageUrl: "https://ebshosting.co.in$image",
-                            errorWidget: (context, url, error) => Image.network(
-                              "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png",
+                            errorWidget: (context, url, error) => Image.asset(
+                              'assets/images/empty.png',
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -370,6 +379,10 @@ class ViewPostsWidget extends HookWidget {
                                                         unit![index];
                                                     print(unitList.id);
                                                     return SubProductsViewPost(
+                                                      productname: productname,
+                                                      offerprice: unitList
+                                                          .offerprice
+                                                          .toString(),
                                                       unitId: unitList.id
                                                           .toString(),
                                                       type: type,
@@ -385,30 +398,27 @@ class ViewPostsWidget extends HookWidget {
                                             );
                                           }));
                             } else {
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    Future.delayed(Duration(seconds: 2), () {
-                                      Navigator.pop(context);
-                                    });
-                                    return AlertDialog(
-                                      title: Text(
-                                          'Product is being added to cart',
-                                          style: TextStyle(fontSize: 12.sp)),
-                                    );
-                                  });
-                              currentButton.value = true;
                               var response = await CartApi.addToCart(
                                   type, productId, shopId, unitId);
+                              // currentButton.value = true;
                               if (response == true) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text("product added to cart"),
-                                        duration: Duration(seconds: 1)));
-                                context.read<CartNotifyProvider>().addCount();
+                                flutterToast('Product added to cart');
+                                // context.read<CartNotifyProvider>().addCount();
                                 context.read<TotalAmount>().GetAllAmounts();
+                                await HiveCartRepo.addToCart(
+                                  shopId.toString(),
+                                  productId.toString(),
+                                  unitId.toString(),
+                                  type,
+                                  1.toString(),
+                                  productname,
+                                  name,
+                                  price,
+                                  offerprice,
+                                );
+                                print(
+                                    'add to cart:::::::' + response.toString());
                               }
-                              print('add to cart:::::::' + response.toString());
 
                               print('add to cart');
                             }
@@ -468,7 +478,13 @@ class ViewPostsWidget extends HookWidget {
                                                   i['id'].toString(),
                                                   currentNumber.value
                                                       .toString());
-                                          print(response);
+                                          if (response == true) {
+                                            print('index ::: ' + i.toString());
+                                            // HiveCartRepo.editHiveCart(
+                                            //     currentNumber.value,
+                                            //     i,
+                                            //     i['id'].toString());
+                                          }
                                         }
                                       }
                                     },
@@ -497,8 +513,9 @@ class ViewPostsWidget extends HookWidget {
                                       var cart = prefs.getString('cart');
                                       var cartBody = jsonDecode(cart!);
                                       var dcartBody = jsonDecode(cartBody);
+                                      List data = dcartBody['cart'];
 
-                                      for (var i in dcartBody['cart']) {
+                                      for (var i in data) {
                                         print(
                                             "${name} :::: ${i['productname']}");
                                         print(name == i['productname']);
@@ -515,8 +532,17 @@ class ViewPostsWidget extends HookWidget {
                                                   i['id'].toString(),
                                                   currentNumber.value
                                                       .toString());
+
+                                          if (response == true) {
+                                            print('index ::: ' + i.toString());
+                                            HiveCartRepo.editHiveCart(
+                                                currentNumber.value,
+                                                data.indexOf(i) - 1,
+                                                i['id'].toString());
+                                          }
                                           print(response);
-                                          print(i);
+                                          print('cartindex ::: ' +
+                                              (data.indexOf(i)).toString());
                                         }
                                       }
                                     },
@@ -547,8 +573,10 @@ class SubProductsViewPost extends HookWidget {
   dynamic productId;
   int? itemCount;
   String? image;
+  String? productname;
   String name;
   String price;
+  String offerprice;
   String status;
   SubProductsViewPost(
       {Key? key,
@@ -558,7 +586,9 @@ class SubProductsViewPost extends HookWidget {
       this.productId,
       this.itemCount,
       this.image,
+      required this.offerprice,
       required this.price,
+      required this.productname,
       required this.name,
       required this.status})
       : super(key: key);
@@ -610,29 +640,43 @@ class SubProductsViewPost extends HookWidget {
                   currentButton.value == false
                       ? GestureDetector(
                           onTap: () async {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  Future.delayed(Duration(seconds: 2), () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                            content:
-                                                Text("product added to cart"),
-                                            duration: Duration(seconds: 1)));
-                                    Navigator.pop(context);
-                                  });
-                                  return AlertDialog(
-                                    title: Text(
-                                        'Product is being added to cart',
-                                        style: TextStyle(fontSize: 12.sp)),
-                                  );
-                                });
-                            currentButton.value = true;
+                            // showDialog(
+                            //     context: context,
+                            //     builder: (BuildContext context) {
+                            //       Future.delayed(Duration(seconds: 2), () {
+                            //         ScaffoldMessenger.of(context).showSnackBar(
+                            //             SnackBar(
+                            //                 content:
+                            //                     Text("product added to cart"),
+                            //                 duration: Duration(seconds: 1)));
+                            //         Navigator.pop(context);
+                            //       });
+                            //       return AlertDialog(
+                            //         title: Text(
+                            //             'Product is being added to cart',
+                            //             style: TextStyle(fontSize: 12.sp)),
+                            //       );
+                            //     });
                             var response = await CartApi.addToCart(
                                 type, productId, shopId, unitId);
-                            context.read<CartNotifyProvider>().addCount();
-                            context.read<TotalAmount>().GetAllAmounts();
-                            print('add to cart:::::::' + response.toString());
+                            if (response == true) {
+                              flutterToast('product added to cart.');
+                              // currentButton.value = true;
+                              await HiveCartRepo.addToCart(
+                                shopId.toString(),
+                                productId.toString(),
+                                unitId.toString(),
+                                type,
+                                1.toString(),
+                                productname,
+                                name,
+                                price,
+                                offerprice,
+                              );
+                              // context.read<CartNotifyProvider>().addCount();
+                              context.read<TotalAmount>().GetAllAmounts();
+                              print('add to cart:::::::' + response.toString());
+                            }
 
                             print('add to cart');
                           },
@@ -644,8 +688,8 @@ class SubProductsViewPost extends HookWidget {
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                       colors: <Color>[
-                                        const Color.fromRGBO(166, 206, 57, 1),
-                                        const Color.fromRGBO(72, 170, 152, 1)
+                                        Color.fromRGBO(246, 219, 59, 1),
+                                        Color.fromARGB(255, 246, 227, 59),
                                       ]),
                                   borderRadius: BorderRadius.circular(8)),
                               child: const Center(

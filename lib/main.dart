@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foodle_mart/config/routes/routes.dart';
+import 'package:foodle_mart/models/cart_modal.dart';
+import 'package:foodle_mart/models/hive_cart_model.dart';
+import 'package:foodle_mart/provider/address_provider.dart';
 import 'package:foodle_mart/provider/cart_charges.dart';
 import 'package:foodle_mart/provider/cart_notify_provider.dart';
 import 'package:foodle_mart/provider/getLocation_provider.dart';
+import 'package:foodle_mart/provider/get_cart_provider.dart';
 import 'package:foodle_mart/provider/get_otp_details_provider.dart';
 import 'package:foodle_mart/provider/phone_number_provider.dart';
 import 'package:foodle_mart/provider/pincode_provider.dart';
@@ -12,12 +16,20 @@ import 'package:foodle_mart/provider/product_map_provider.dart';
 import 'package:foodle_mart/provider/search_all_provider.dart';
 import 'package:foodle_mart/provider/total_amount_provider.dart';
 import 'package:foodle_mart/views/authentication/phone.dart';
+import 'package:foodle_mart/views/main_screen/main_screen.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   // String userId;
   WidgetsFlutterBinding.ensureInitialized();
+  //Hive initialization
+  await Hive.initFlutter();
+
+  Hive.registerAdapter(HiveCartAdapter());
+  await Hive.openBox<HiveCart>('cart');
+
   var prefs = await SharedPreferences.getInstance();
   print(prefs.getString('Id').toString().isNotEmpty);
   print(prefs.getString('Id'));
@@ -32,13 +44,14 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => SearchAllProvider()),
         ChangeNotifierProvider(create: (_) => TotalAmount()),
         ChangeNotifierProvider(create: (_) => ProductMapProvider()),
-        // ChangeNotifierProvider(create: (_) => GetLocation()),
+        ChangeNotifierProvider(create: (_) => AddressApiProvider()),
+        ChangeNotifierProvider(create: (_) => GetCartProvider()),
         ChangeNotifierProvider(create: (_) => CartNotifyProvider())
       ],
       builder: (context, child) {
         // var userId = Provider.of<LoggedIn>(context).userId;
         // Future loggedIn() async {
-        //   WidgetsFlutterBinding.ensureInitialized();
+        WidgetsFlutterBinding.ensureInitialized();
         //   var prefs = await SharedPreferences.getInstance();
         //   print(prefs.getString('Id') == null);
         //   // print(prefs.getString('Id'));
@@ -49,7 +62,8 @@ Future<void> main() async {
             designSize: const Size(393, 830),
             builder: () => MaterialApp(
                   debugShowCheckedModeBanner: false,
-                  home: DefaultTabController(length: 4, child: Phone()),
+                  home: MainScreen(),
+                  // DefaultTabController(length: 2, child: Phone()),
                   initialRoute: userId.toString().isEmpty || userId == null
                       ? '/phone'
                       : '/mainScreen',

@@ -109,7 +109,8 @@ class OtpButton extends HookWidget {
       width: double.infinity,
       height: 50,
       decoration: BoxDecoration(
-          color: Colors.lightGreen, borderRadius: BorderRadius.circular(10)),
+          color: Color.fromRGBO(246, 219, 59, 1),
+          borderRadius: BorderRadius.circular(10)),
       child: state.value
           ? TextButton(
               onPressed: () async {

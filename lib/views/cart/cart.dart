@@ -3,16 +3,22 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodle_mart/models/address_model.dart';
 import 'package:foodle_mart/models/cart_modal.dart';
+import 'package:foodle_mart/models/hive_cart_model.dart';
 import 'package:foodle_mart/provider/cart_charges.dart';
 import 'package:foodle_mart/provider/cart_notify_provider.dart';
+import 'package:foodle_mart/provider/get_cart_provider.dart';
 import 'package:foodle_mart/provider/pincode_provider.dart';
 import 'package:foodle_mart/provider/total_amount_provider.dart';
 import 'package:foodle_mart/repository/customer_repo.dart';
+import 'package:foodle_mart/repository/hive_repo.dart';
+import 'package:foodle_mart/utils/pop_up_message.dart';
 import 'package:foodle_mart/views/profile/address/your_address.dart';
 import 'package:foodle_mart/widgets/named_button.dart';
 import 'package:foodle_mart/widgets/search_button.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
@@ -36,11 +42,12 @@ class _CartState extends State<Cart> {
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
 
-  @override
-  void dispost() {
-    super.dispose();
-    _razorpay.clear(); // Removes all listeners
-  }
+  // @override
+  // void dispost() {
+  //   super.dispose();
+  //   // Hive.box('cart').close();
+  //   _razorpay.clear(); // Removes all listeners
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +64,7 @@ class _CartState extends State<Cart> {
                   Color.fromARGB(255, 246, 227, 59),
                 ]))),
             automaticallyImplyLeading: false,
-            title: Image.asset("assets/images/foodle_logo.png", width: 90),
+            title: Image.asset("assets/images/foodle_logo.png", width: 70.h),
             bottom: PreferredSize(
                 child: Column(
                   children: [
@@ -72,15 +79,25 @@ class _CartState extends State<Cart> {
                       ],
                     ),
                     Container(
-                        padding: const EdgeInsets.only(
-                            left: 40, top: 5, bottom: 5, right: 30),
+                        padding:
+                            const EdgeInsets.only(left: 20, top: 5, bottom: 5),
                         width: double.infinity,
-                        color: Color.fromARGB(255, 252, 235, 82),
+                        color: Color.fromRGBO(246, 219, 59, 1),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("Delivery to :"),
+                            Text("Delivery to :",
+                                style: TextStyle(fontSize: 12)),
                             Icon(Icons.location_on_outlined, size: 15),
-                            Text("${context.watch<pincodeProvider>().pincode}"),
+                            Container(
+                              padding: const EdgeInsets.only(top: 12),
+                              width: 250,
+                              height: 40,
+                              child: Text(
+                                  "${context.watch<pincodeProvider>().pincode}",
+                                  style: TextStyle(fontSize: 12)),
+                            ),
                           ],
                         ))
                   ],
@@ -102,124 +119,294 @@ class _CartState extends State<Cart> {
   }
 }
 
+// class CartBody extends HookWidget {
+//   CartBody({Key? key}) : super(key: key);
+//   List totalAmount = [];
+//   List errorWidget = [
+//     Image.asset('assets/images/empty.png'),
+//     CircularProgressIndicator()
+//   ];
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     context.read<TotalAmount>().GetAllAmounts();
+//     final totalAmount = useState(0);
+//     final currentPage = useState(1);
+//     final refreshHook = useState(0);
+//     return FutureBuilder<CartModal?>(
+//         future: context.watch<GetCartProvider>().getCart(),
+//         builder: (context, AsyncSnapshot snapshot) {
+//           print('cart snapshotData ::: ' + snapshot.data.toString());
+//           if (snapshot.hasData) {
+//             CartModal data = snapshot.data;
+//             int length = data.cart!.length;
+//             return Column(
+//               children: [
+//                 Container(
+//                   constraints:
+//                       BoxConstraints(maxHeight: 440.h, minHeight: 420.h),
+//                   // height: MediaQuery.of(context).size.height * 3,
+//                   // width: 500.h,
+//                   child: ListView.builder(
+//                       primary: true,
+//                       shrinkWrap: true,
+//                       itemCount: length,
+//                       itemBuilder: ((context, index) {
+//                         return Container(
+//                             margin: const EdgeInsets.only(
+//                                 top: 15, left: 20, right: 20, bottom: 10),
+//                             width: 300.w,
+//                             height: 110.h,
+//                             decoration: BoxDecoration(
+//                                 borderRadius: BorderRadius.circular(10),
+//                                 border: Border.all(
+//                                     color: Colors.grey.shade200, width: 2.w)),
+//                             child: CalculateTheTotal(
+//                               quantity: data.cart![index].quantity ?? 1,
+//                               unitText:
+//                                   ' (${data.cart![index].unitname.toString()})',
+//                               cartId: data.cart![index].id.toString(),
+//                               image:
+//                                   "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png",
+//                               title: data.cart![index].productname.toString(),
+//                               discountprice: data.cart![index].price == ""
+//                                   ? 0
+//                                   : data.cart![index].price,
+//                               price: data.cart![index].offerprice == ""
+//                                   ? 0
+//                                   : int.parse(
+//                                       data.cart![index].offerprice ?? '0'),
+//                             ));
+//                       })),
+//                 ),
+//                 Column(
+//                   children: [
+//                     Container(
+//                         margin: const EdgeInsets.symmetric(
+//                             horizontal: 20, vertical: 20),
+//                         padding: const EdgeInsets.symmetric(
+//                             horizontal: 20, vertical: 5),
+//                         decoration: BoxDecoration(
+//                             borderRadius: BorderRadius.circular(10),
+//                             border: Border.all(
+//                                 color: Colors.grey.shade200, width: 2.w)),
+//                         child: Column(
+//                           children: [
+//                             Row(
+//                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                               children: [
+//                                 Text("Delivery charges"),
+//                                 Text("₹${data.deliveryCharge}"),
+//                               ],
+//                             ),
+//                             SizedBox(height: 5),
+//                             Row(
+//                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                               children: [
+//                                 Text("Taxes and Charges"),
+//                                 Text("₹${data.taxValue}"),
+//                               ],
+//                             ),
+//                             SizedBox(height: 5),
+//                             Row(
+//                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                               children: [
+//                                 Text("Total Amount",
+//                                     style:
+//                                         TextStyle(fontWeight: FontWeight.w600)),
+//                                 Text(
+//                                     "₹${context.watch<TotalAmount>().totalAmount + double.parse(data.deliveryCharge.toString()) + double.parse(data.taxValue.toString())}",
+//                                     style: TextStyle(color: Colors.green))
+//                               ],
+//                             ),
+//                           ],
+//                         )),
+//                     Padding(
+//                       padding: const EdgeInsets.symmetric(horizontal: 20),
+//                       child: NamedButton(
+//                         title: "Place Order",
+//                         function: () {
+//                           show(context);
+//                           print('order placed');
+//                         },
+//                       ),
+//                     )
+//                   ],
+//                 )
+//               ],
+//             );
+//           }
+//           // else if (snapshot.data == 'no data') {
+//           //   return SizedBox(
+//           //       height: 470.h, child: Center(child: Text('No Data Available')));
+//           // }
+//           else {
+//             Future.delayed(Duration(seconds: 5), () {
+//               currentPage.value = 0;
+//             });
+//             return SizedBox(
+//                 height: 470.h,
+//                 child: Center(child: errorWidget[currentPage.value]));
+//           }
+//         });
+//   }
+// }
+
 class CartBody extends HookWidget {
   CartBody({Key? key}) : super(key: key);
   List totalAmount = [];
+  List errorWidget = [
+    Image.asset('assets/images/empty.png'),
+    CircularProgressIndicator()
+  ];
 
   @override
   Widget build(BuildContext context) {
     context.read<TotalAmount>().GetAllAmounts();
     final totalAmount = useState(0);
-    return FutureBuilder<CartModal?>(
+    final currentPage = useState(1);
+    return FutureBuilder(
         future: CartApi.getCart(),
-        builder: (context, AsyncSnapshot snapshot) {
-          print('cart snapshotData ::: ' + snapshot.data.toString());
+        builder: ((context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
             CartModal data = snapshot.data;
-            int length = data.cart!.length;
             return Column(
               children: [
                 Container(
                   constraints:
                       BoxConstraints(maxHeight: 440.h, minHeight: 420.h),
-                  // height: 470.h,
-                  child: ListView.builder(
-                      primary: true,
-                      shrinkWrap: true,
-                      itemCount: length,
-                      itemBuilder: ((context, index) {
-                        return Container(
-                            margin: const EdgeInsets.only(
-                                top: 15, left: 20, right: 20, bottom: 10),
-                            width: 300.w,
-                            height: 110.h,
+                  // height: MediaQuery.of(context).size.height * 3,
+                  child: ValueListenableBuilder<Box<HiveCart>>(
+                      valueListenable: Boxes.getHiveCart().listenable(),
+                      builder: (context, box, _) {
+                        CartModal cartList = data;
+                        final cartdata = box.values.toList().cast<HiveCart>();
+                        if (cartdata.length != 0) {
+                          return ListView.builder(
+                              primary: true,
+                              shrinkWrap: true,
+                              itemCount: cartdata.length,
+                              itemBuilder: ((context, index) {
+                                if (cartList.cart![index].productId ==
+                                    cartdata[index].productId) {
+                                  print(
+                                      '${cartList.cart![index].productId} :: ${cartdata[index].productId}');
+                                }
+                                return Container(
+                                    margin: const EdgeInsets.only(
+                                        top: 15,
+                                        left: 20,
+                                        right: 20,
+                                        bottom: 10),
+                                    width: 300.w,
+                                    height: 110.h,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                            color: Colors.grey.shade200,
+                                            width: 2.w)),
+                                    child: CalculateTheTotal(
+                                      currentindex: index,
+                                      cartIndex: cartdata[index].key,
+                                      quantity: int.parse(
+                                          cartdata[index].quantity.toString()),
+                                      unitText:
+                                          ' (${cartdata[index].unitname.toString()})',
+                                      cartId:
+                                          cartList.cart![index].id.toString(),
+                                      image:
+                                          "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png",
+                                      title: cartdata[index]
+                                          .productname
+                                          .toString(),
+                                      discountprice:
+                                          cartdata[index].offerprice == ""
+                                              ? 0
+                                              : cartdata[index].price,
+                                      price: cartdata[index].offerprice == ""
+                                          ? 0
+                                          : int.parse(
+                                              cartdata[index].offerprice ??
+                                                  '0'),
+                                    ));
+                              }));
+                        } else {
+                          return Center(child: Text('no cart yet..'));
+                        }
+                      }),
+                ),
+                Column(
+                  children: [
+                    Column(
+                      children: [
+                        Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 20),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 5),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                     color: Colors.grey.shade200, width: 2.w)),
-                            child: CalculateTheTotal(
-                              quantity: data.cart![index].quantity ?? 1,
-                              unitText:
-                                  ' (${data.cart![index].unitname.toString()})',
-                              cartId: data.cart![index].id.toString(),
-                              image:
-                                  "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png",
-                              title: data.cart![index].productname.toString(),
-                              discountprice: data.cart![index].price == ""
-                                  ? 0
-                                  : data.cart![index].price,
-                              price: data.cart![index].offerprice == ""
-                                  ? 0
-                                  : int.parse(
-                                      data.cart![index].offerprice ?? '0'),
-                            ));
-                      })),
-                ),
-                Column(
-                  children: [
-                    Container(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 20),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 5),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                                color: Colors.grey.shade200, width: 2.w)),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            child: Column(
                               children: [
-                                Text("Delivery charges"),
-                                Text("₹${data.deliveryCharge}"),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text("Delivery charges"),
+                                    Text("₹${data.deliveryCharge}"),
+                                  ],
+                                ),
+                                SizedBox(height: 5),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text("Taxes and Charges"),
+                                    Text("₹${data.taxValue}"),
+                                  ],
+                                ),
+                                SizedBox(height: 5),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text("Total Amount",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w600)),
+                                    Text(
+                                        "₹${context.watch<TotalAmount>().totalAmount + double.parse(data.deliveryCharge.toString()) + double.parse(data.taxValue.toString())}",
+                                        style: TextStyle(color: Colors.green))
+                                  ],
+                                ),
                               ],
-                            ),
-                            SizedBox(height: 5),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("Taxes and Charges"),
-                                Text("₹${data.taxValue}"),
-                              ],
-                            ),
-                            SizedBox(height: 5),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("Total Amount",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w600)),
-                                Text(
-                                    "₹${context.watch<TotalAmount>().totalAmount}",
-                                    style: TextStyle(color: Colors.green))
-                              ],
-                            ),
-                          ],
-                        )),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: NamedButton(
-                        title: "Place Order",
-                        function: () {
-                          show(context);
-                          print('order placed');
-                        },
-                      ),
+                            )),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: NamedButton(
+                            title: "Place Order",
+                            function: () {
+                              show(context);
+                              print('order placed');
+                            },
+                          ),
+                        )
+                      ],
                     )
                   ],
                 )
               ],
             );
-          } else if (snapshot.data == 'no data') {
-            return SizedBox(
-                height: 470.h, child: Center(child: Text('No Data Available')));
           } else {
-            return SizedBox(
-                height: 470.h,
-                child: Center(child: Text('No Products in cart')));
+            Future.delayed(Duration(seconds: 3), () {
+              currentPage.value = 0;
+            });
+            return Center(
+              child: errorWidget[currentPage.value],
+            );
           }
-        });
+        }));
   }
 }
 
@@ -228,13 +415,17 @@ class CalculateTheTotal extends HookWidget {
   String unitText;
   String? cartId;
   String image;
+  int cartIndex;
   String title;
   dynamic discountprice;
   int? price;
+  int currentindex;
   CalculateTheTotal(
       {Key? key,
+      required this.currentindex,
       this.quantity = 1,
       this.cartId,
+      required this.cartIndex,
       this.unitText = '',
       this.image =
           "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png",
@@ -281,8 +472,7 @@ class CalculateTheTotal extends HookWidget {
                       color: Colors.grey.shade600,
                       fontSize: 12.sp)),
               TextSpan(
-                  text:
-                      " ₹${price! * (quantity == 0 ? 1 : currentNumber.value)}",
+                  text: " ₹${price! * currentNumber.value.toInt()}",
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     // fontSize: 12.sp
@@ -303,14 +493,8 @@ class CalculateTheTotal extends HookWidget {
                         context.read<TotalAmount>().GetAllAmounts();
                         currentNumber.value = currentNumber.value - 1;
                         if (currentNumber.value <= 0) currentNumber.value = 1;
-
-                        var response = await CartApi.updateCart(
-                            cartId.toString(), currentNumber.value.toString());
-                        if (response == true) {
-                          Navigator.pop(context);
-                          Navigator.pushNamed(context, '/cart');
-                        }
-                        print(response);
+                        HiveCartRepo.editHiveCart(
+                            currentNumber.value, cartIndex, cartId);
                       },
                       child: Container(
                           // padding: const EdgeInsets.symmetric(horizontal: 1),
@@ -333,13 +517,9 @@ class CalculateTheTotal extends HookWidget {
                         context.read<TotalAmount>().GetAllAmounts();
                         currentNumber.value = currentNumber.value + 1;
                         if (currentNumber.value >= 10) currentNumber.value = 10;
-                        var response = await CartApi.updateCart(
-                            cartId.toString(), currentNumber.value.toString());
-                        print(response);
-                        if (response == true) {
-                          Navigator.pop(context);
-                          Navigator.pushNamed(context, '/cart');
-                        }
+                        print('cart cartindex ::: ' + cartIndex.toString());
+                        HiveCartRepo.editHiveCart(
+                            currentNumber.value, cartIndex, cartId);
                       },
                       child: Container(
                           width: 15.w,
@@ -367,14 +547,13 @@ class CalculateTheTotal extends HookWidget {
                       actions: [
                         TextButton(
                             onPressed: () async {
+                              context.read<TotalAmount>().GetAllAmounts();
+                              HiveCartRepo.deleteHivecart(cartIndex);
                               var response = await CartApi.removeCart(cartId);
+                              context.read<CartNotifyProvider>().removeCount();
+                              // context.watch<GetCartProvider>().getCart();
                               if (response == true) {
-                                context
-                                    .read<CartNotifyProvider>()
-                                    .removeCount();
                                 Navigator.pop(context);
-                                // Navigator.pop(context);
-                                // Navigator.pushNamed(context, '/cart');
                                 print(response);
                               }
                             },
@@ -426,11 +605,15 @@ class SelectPayment extends StatelessWidget {
         ),
         GestureDetector(
           onTap: () async {
-            await OrderApi.placeOrder('CoD');
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("Order placed successfully"),
-                duration: Duration(seconds: 2)));
-            Navigator.pushNamed(context, '/mainScreen');
+            var response = await OrderApi.placeOrder('CoD');
+            if (response == true) {
+              Hive.close();
+              flutterToast('Order placed successfuly');
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/mainScreen', (Route<dynamic> route) => false);
+            } else {
+              flutterToast('something went wrong..!!');
+            }
           },
           child: Container(
               width: double.infinity,
@@ -476,11 +659,17 @@ void show(BuildContext context) async {
 }
 
 class AddressBody extends HookWidget {
-  const AddressBody({Key? key}) : super(key: key);
+  AddressBody({Key? key}) : super(key: key);
+  List errorWidget = [
+    Image.asset('assets/images/add_address.png'),
+    CircularProgressIndicator()
+  ];
 
   @override
   Widget build(BuildContext context) {
     final state = useState(0);
+    final currentPage = useState(1);
+    final isAddress = useState(false);
     return Column(
       children: [
         Padding(
@@ -514,32 +703,43 @@ class AddressBody extends HookWidget {
                 builder: ((context, AsyncSnapshot snapshot) {
                   if (snapshot.hasData) {
                     List<AddressListModel> data = snapshot.data;
-                    return ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: data.length,
-                        itemBuilder: ((context, index) {
-                          AddressListModel addressList = data[index];
-                          return GestureDetector(
-                            onTap: () async {
-                              await AddressApi.defualtAddress(
-                                  addressList.id.toString());
-                              state.value = index;
-                            },
-                            child: SelectableAddressWidget(
-                              defaultAddr: addressList.addressDefault,
-                              id: addressList.id.toString(),
-                              addresstype: addressList.type.toString(),
-                              address: addressList.address.toString(),
-                              phone: addressList.mobile.toString(),
-                              pincode: addressList.pincode.toString(),
-                            ),
-                          );
-                        }));
+                    if (data.length != 0) {
+                      isAddress.value = true;
+                      currentPage.value = 0;
+                      return ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: data.length,
+                          itemBuilder: ((context, index) {
+                            AddressListModel addressList = data[index];
+                            return GestureDetector(
+                              onTap: () async {
+                                await AddressApi.defualtAddress(
+                                    addressList.id.toString());
+                                state.value = index;
+                              },
+                              child: SelectableAddressWidget(
+                                defaultAddr: addressList.addressDefault,
+                                id: addressList.id.toString(),
+                                addresstype: addressList.type.toString(),
+                                address: addressList.address.toString(),
+                                phone: addressList.mobile.toString(),
+                                pincode: addressList.pincode.toString(),
+                              ),
+                            );
+                          }));
+                    } else {
+                      Future.delayed(Duration(seconds: 5), () {
+                        currentPage.value = 0;
+                      });
+                      return Center(
+                          child: Center(child: errorWidget[currentPage.value]));
+                    }
                   } else {
-                    return const Center(
-                        child: Text('No Address yet!!',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.w600)));
+                    Future.delayed(Duration(seconds: 5), () {
+                      currentPage.value = 0;
+                    });
+                    return Center(
+                        child: Center(child: errorWidget[currentPage.value]));
                   }
                 }))),
         Padding(
@@ -547,9 +747,20 @@ class AddressBody extends HookWidget {
           child: NamedButton(
             title: "Deliver here",
             function: () {
-              Navigator.pop(context);
-              selectpayment(context);
-              print('order placed');
+              print(isAddress.value);
+              if (isAddress.value == true) {
+                Navigator.pop(context);
+                selectpayment(context);
+                print('order placed');
+              } else {
+                // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                //     elevation: 2,
+                //     content: Text("Please add a delivery address"),
+                //     duration: Duration(seconds: 3)));
+                Fluttertoast.showToast(
+                    msg: 'Please add a delivery address',
+                    backgroundColor: Color.fromARGB(255, 153, 202, 19));
+              }
             },
           ),
         )

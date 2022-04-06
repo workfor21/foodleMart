@@ -1,14 +1,12 @@
-// To parse this JSON data, do
-//
-//     final cartModal = cartModalFromJson(jsonString);
-
 import 'dart:convert';
+
+import 'package:hive/hive.dart';
 
 CartModal cartModalFromJson(String str) => CartModal.fromJson(json.decode(str));
 
 String cartModalToJson(CartModal data) => json.encode(data.toJson());
 
-class CartModal {
+class CartModal extends HiveObject {
   CartModal({
     this.sts,
     this.msg,

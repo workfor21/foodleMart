@@ -46,7 +46,7 @@ class ProductsViewMore extends StatelessWidget {
                       padding: const EdgeInsets.only(
                           left: 40, top: 5, bottom: 5, right: 30),
                       width: double.infinity,
-                      color: Color.fromARGB(255, 252, 235, 82),
+                      color: Color.fromARGB(255, 255, 226, 58),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -90,8 +90,8 @@ class ProductsViewMore extends StatelessWidget {
                                 // height: 50,
                                 imageUrl:
                                     "https://ebshosting.co.in${categoryProducts.logo}",
-                                errorWidget: (context, url, error) => Image.network(
-                                    "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png"),
+                                errorWidget: (context, url, error) =>
+                                    Image.asset('assets/images/empty.png'),
                               ),
                             ),
                             // Image.network(

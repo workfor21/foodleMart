@@ -2,17 +2,29 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:foodle_mart/models/home_model.dart';
 import 'package:foodle_mart/models/res_model.dart';
 import 'package:foodle_mart/repository/customer_repo.dart';
 import 'package:foodle_mart/utils/star_rating.dart';
 import 'package:foodle_mart/widgets/search_button.dart';
 
-class NearYou extends StatelessWidget {
+class NearYou extends StatefulWidget {
   static const routeName = '/near-you';
   const NearYou({
     Key? key,
   }) : super(key: key);
+
+  @override
+  State<NearYou> createState() => _NearYouState();
+}
+
+class _NearYouState extends State<NearYou> {
+  var currentPage = 1;
+  List errorWidget = [
+    Image.asset('assets/images/empty.png'),
+    CircularProgressIndicator()
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +42,7 @@ class NearYou extends StatelessWidget {
                   Color.fromARGB(255, 246, 227, 59),
                 ]))),
             automaticallyImplyLeading: false,
-            title: Image.asset("assets/icons/logo1.png"),
+            title: Image.asset("assets/icons/logo1.png", width: 60.w),
             actions: [
               IconButton(
                   onPressed: () {
@@ -61,7 +73,7 @@ class NearYou extends StatelessWidget {
                         padding: const EdgeInsets.only(
                             left: 40, top: 5, bottom: 5, right: 30),
                         width: double.infinity,
-                        color: Color.fromARGB(255, 252, 235, 82),
+                        color: Color.fromARGB(255, 255, 226, 58),
                         child: Text(
                           arguments == true
                               ? 'Restuarants near you'
@@ -109,9 +121,15 @@ class NearYou extends StatelessWidget {
                                     child: CachedNetworkImage(
                                       imageUrl:
                                           "https://ebshosting.co.in${resturants.logo}",
+                                      placeholder: (context, string) {
+                                        return Image.asset(
+                                            'assets/images/empty.png',
+                                            width: 100.h,
+                                            fit: BoxFit.cover);
+                                      },
                                       errorWidget: (context, url, error) =>
-                                          Image.network(
-                                              "https://westsiderc.org/wp-content/uploads/2019/08/Image-Not-Available.png"),
+                                          Image.asset('assets/images/empty.png',
+                                              width: 100.h, fit: BoxFit.cover),
                                     ),
                                   ),
                                   // Image.network(
@@ -148,7 +166,10 @@ class NearYou extends StatelessWidget {
                         );
                       }));
                 } else {
-                  return Center(child: Text('No Data Available'));
+                  Future.delayed(Duration(seconds: 3), () {
+                    currentPage = 0;
+                  });
+                  return Center(child: errorWidget[currentPage]);
                 }
               })),
         ));
