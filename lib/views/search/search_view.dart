@@ -58,7 +58,7 @@ class SearchView extends StatelessWidget {
                           Radius.circular(10),
                         )),
                         hintStyle: TextStyle(fontSize: 12),
-                        hintText: 'Search for food, restaurants, supermarkets',
+                        hintText: 'Search for restaurants, supermarkets',
                         prefixIcon: Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: SvgPicture.asset(
